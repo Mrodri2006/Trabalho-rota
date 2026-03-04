@@ -30,6 +30,7 @@ export default function TelaInicialAutonomo({}) {
   ]);
   const [alertVisivel, setAlertVisivel] = useState(false);
   const [servicoAceito, setServicoAceito] = useState<any>(null);
+  const [servicoRejeitado, setServicoRejeitado] = useState<any>(null);
 
   const servicosDisponiveis = [
     { id: 1, estilo: "Eletricista" },
@@ -37,6 +38,35 @@ export default function TelaInicialAutonomo({}) {
     { id: 3, estilo: "Montagem" },
     { id: 4, estilo: "Pintor" },
   ];
+
+    const handleRejeitarServico = async (servico: any) => {
+    try {
+      const usuarioId = auth.currentUser?.uid;
+      if (!usuarioId) {
+        Alert.alert("Erro", "Usuário não autenticado");
+        return;
+      }
+
+        await firestore
+        .collection("Servicos")
+        .doc(usuarioId)
+        .collection("ServicosRejeitados")
+        .add({
+          titulo: servico.titulo,
+          status: "rejeitado",
+        });
+
+      // Remover da lista de solicitados
+      setServicosSolicitados((prev) => prev.filter((item) => item.id !== servico.id));
+
+      // Mostrar alert estilizado
+      setServicoRejeitado(servico);
+      setAlertVisivel(true);
+    } catch (erro) {
+      console.log("Erro ao rejeitar serviço:", erro);
+      Alert.alert("Erro", "Não foi possível rejeitar o serviço");
+    }
+  };
 
   const handleAceitarServico = async (servico: any) => {
     try {
@@ -48,7 +78,7 @@ export default function TelaInicialAutonomo({}) {
 
       // Salvar no Firebase
       await firestore
-        .collection("Usuario")
+        .collection("Servicos")
         .doc(usuarioId)
         .collection("ServicosAgendados")
         .add({
@@ -119,7 +149,10 @@ export default function TelaInicialAutonomo({}) {
               <Text style={styles.buttonText}>Aceitar</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.rejectButton}>
+            <TouchableOpacity 
+            style={styles.rejectButton}
+            onPress={() => handleRejeitarServico(item)}
+            >
               <Text style={styles.rejectText}>Recusar</Text>
             </TouchableOpacity>
           </View>

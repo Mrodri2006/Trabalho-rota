@@ -4,7 +4,7 @@ export class Usuario {
     public email:   string;
     public senha:   string;
     public fone:    string;
-    public datanascimento:    date;    
+    public datanascimento: Date;   
 
     constructor(obj?: Partial<Usuario>){
         if(obj){

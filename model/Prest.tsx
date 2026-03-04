@@ -5,6 +5,7 @@ export class Prest {
     public fone:    string;
     public datanascimento:Date;  
     public cnpj: string;  
+    public tipo: string;
 
     constructor(obj?: Partial<Prest>){
         if(obj){
@@ -14,6 +15,7 @@ export class Prest {
             this.fone   = obj.fone
             this.datanascimento   = obj.datanascimento
             this.cnpj = obj.cnpj
+            this.tipo   = obj.tipo
         }
     }
 
@@ -25,6 +27,7 @@ export class Prest {
             "fone"  :   "${this.fone}",
             "datanascimento"  :   "${this.datanascimento}",
             "cnpj" : "${this.cnpj}"
+            "tipo"  :   "${this.tipo}"
         }`
         return objeto
     }
@@ -37,6 +40,7 @@ export class Prest {
             fone    : this.fone,
             datanascimento    : this.datanascimento,
             cnpj : this.cnpj,
+            tipo    : this.tipo
         }
         return prest
     }

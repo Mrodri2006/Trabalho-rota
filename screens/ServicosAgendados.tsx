@@ -29,7 +29,7 @@ export default function ServicosAgendados() {
       if (!usuarioId) return;
 
       const docSnap = await firestore
-        .collection("Usuario")
+        .collection("Servicos")
         .doc(usuarioId)
         .collection("ServicosAgendados")
         .get();
