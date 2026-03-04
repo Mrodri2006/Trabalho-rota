@@ -47,7 +47,7 @@ export default function TelaInicialAutonomo({}) {
         return;
       }
 
-        await firestore
+      await firestore
         .collection("Servicos")
         .doc(usuarioId)
         .collection("ServicosRejeitados")
@@ -59,7 +59,10 @@ export default function TelaInicialAutonomo({}) {
       // Remover da lista de solicitados
       setServicosSolicitados((prev) => prev.filter((item) => item.id !== servico.id));
 
-      // Mostrar alert estilizado
+      // Limpar estado de aceitação se houver
+      setServicoAceito(null);
+
+      // Mostrar alert estilizado para rejeição
       setServicoRejeitado(servico);
       setAlertVisivel(true);
     } catch (erro) {
@@ -104,6 +107,7 @@ export default function TelaInicialAutonomo({}) {
   const handleFecharAlert = () => {
     setAlertVisivel(false);
     setServicoAceito(null);
+    setServicoRejeitado(null);
   };
 
   return (
@@ -122,7 +126,6 @@ export default function TelaInicialAutonomo({}) {
             <User size={24} />
           </TouchableOpacity>
       </View>
-
 
       {/* Serviços Solicitados */}
       <Text style={styles.sectionTitle}>Serviços Solicitados</Text>
@@ -170,9 +173,10 @@ export default function TelaInicialAutonomo({}) {
         ))}
       </View>
 
-      {/* Botão Flutuante */}
-      <TouchableOpacity style={styles.floatingButton}>
-        <Plus size={30} color="#fff" />
+      {/* Botão Adicionar Serviço */}
+      <TouchableOpacity style={styles.addServiceButton} onPress={() => navigation.navigate("AddServico", { PrestId: auth.currentUser?.uid })}>
+        <Plus size={24} color="#fff" />
+        <Text style={styles.addServiceText}>Adicionar Serviço</Text>
       </TouchableOpacity>
 
       {/* Alert Estilizado */}
@@ -184,31 +188,50 @@ export default function TelaInicialAutonomo({}) {
       >
         <View style={styles.alertOverlay}>
           <View style={styles.alertContainer}>
-            <View style={styles.alertIconContainer}>
-              <CheckCircle size={60} color="#4CAF50" />
+                  <View style={styles.alertIconContainer}>
+              {servicoAceito ? (
+                <CheckCircle size={60} color="#4CAF50" />
+              ) : (
+                <X size={60} color="#F44336" />
+              )}
             </View>
-            <Text style={styles.alertTitle}>Serviço Aceito!</Text>
+            <Text style={styles.alertTitle}>
+              {servicoAceito ? "Serviço Aceito!" : "Serviço Rejeitado!"}
+            </Text>
             <Text style={styles.alertMessage}>
-              "{servicoAceito?.titulo}" foi adicionado aos seus serviços agendados
+              {servicoAceito
+                ? `"${servicoAceito.titulo}" foi adicionado aos seus serviços agendados`
+                : `"${servicoRejeitado?.titulo}" foi recusado`}
             </Text>
             
             <View style={styles.alertButtonsRow}>
-              <TouchableOpacity
-                style={styles.alertButton}
-                onPress={() => {
-                  handleFecharAlert();
-                  navigation.navigate("ServicosAgendados");
-                }}
-              >
-                <Text style={styles.alertButtonText}>Ver Agendados</Text>
-              </TouchableOpacity>
+              {servicoAceito ? (
+                <TouchableOpacity
+                  style={styles.alertButton}
+                  onPress={() => {
+                    handleFecharAlert();
+                    navigation.navigate("ServicosAgendados");
+                  }}
+                >
+                  <Text style={styles.alertButtonText}>Ver Agendados</Text>
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity
+                  style={styles.alertButtonSecondary}
+                  onPress={handleFecharAlert}
+                >
+                  <Text style={styles.alertButtonSecondaryText}>OK</Text>
+                </TouchableOpacity>
+              )}
 
-              <TouchableOpacity
-                style={styles.alertButtonSecondary}
-                onPress={handleFecharAlert}
-              >
-                <Text style={styles.alertButtonSecondaryText}>Continuar</Text>
-              </TouchableOpacity>
+              {servicoAceito && (
+                <TouchableOpacity
+                  style={styles.alertButtonSecondary}
+                  onPress={handleFecharAlert}
+                >
+                  <Text style={styles.alertButtonSecondaryText}>Continuar</Text>
+                </TouchableOpacity>
+              )}
             </View>
           </View>
         </View>
@@ -221,7 +244,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    paddingBottom: 80,
     backgroundColor: "#fff",
   },
 
@@ -359,18 +381,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#333",
   },
-
-  /* BOTÃO FLUTUANTE */
-  floatingButton: {
-    position: "absolute",
-    right: 16,
-    bottom: 16,
-    backgroundColor: "#1e90ff",
-    padding: 18,
-    borderRadius: 40,
-    elevation: 6,
-  },
-
   /* ALERT ESTILIZADO */
   alertOverlay: {
     flex: 1,
@@ -445,5 +455,24 @@ const styles = StyleSheet.create({
     color: "#1e90ff",
     fontWeight: "600",
     fontSize: 14,
+  },
+
+  /* BOTÃO ADICIONAR SERVIÇO */
+  addServiceButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#1e90ff",
+    padding: 16,
+    borderRadius: 10,
+    marginTop: 16,
+    marginBottom: 16,
+  },
+
+  addServiceText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
+    marginLeft: 8,
   },
 });

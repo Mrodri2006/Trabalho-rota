@@ -61,7 +61,7 @@ export default function ServicosAgendados() {
               if (!usuarioId) return;
 
               await firestore
-                .collection("Usuario")
+                .collection("Servicos")
                 .doc(usuarioId)
                 .collection("ServicosAgendados")
                 .doc(firestoreId)

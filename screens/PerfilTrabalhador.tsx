@@ -1,13 +1,14 @@
-import { View, Text, TouchableOpacity, ScrollView, Alert } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, Alert, Image } from "react-native";
 import { ArrowLeft, Edit2, Star, MapPin, Phone, Mail, LogOut, Calendar, Briefcase } from "lucide-react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
 import { auth, firestore } from "../firebase";
 import styles from "../estilo";
-import Aval from "../model/Aval";
+import * as ImagePicker from "expo-image-picker";
 
 export default function PerfilTrabalhador() {
   const navigation = useNavigation();
+
   const [usuario, setUsuario] = useState({
     nome: "",
     email: "",
@@ -17,24 +18,27 @@ export default function PerfilTrabalhador() {
     numeroAvaliacoes: 45,
     localizacao: "São Paulo, SP",
     descricao: "Profissional com experiência em serviços",
-    historico: [
-      { id: 1, servico: "Reparo Elétrico", data: "20/11/2024", status: "Concluído", valor: "R$ 150" },
-      { id: 2, servico: "Desentupimento", data: "15/11/2024", status: "Concluído", valor: "R$ 200" },
-      { id: 3, servico: "Instalação Luminária", data: "10/11/2024", status: "Concluído", valor: "R$ 120" },
-    ],
   });
 
-  // Carregar dados do usuário do Firebase
+  const [historico, setHistorico] = useState([]);
+
   useFocusEffect(
     useCallback(() => {
-      const carregarDadosUsuario = async () => {
+      const carregarDados = async () => {
         try {
           const usuarioAutenticado = auth.currentUser;
+
           if (usuarioAutenticado) {
-            const docSnap = await firestore.collection("Usuario").doc(usuarioAutenticado.uid).get();
-            
+            console.log('UID do usuário:', usuarioAutenticado.uid); // Debug
+            // 🔹 Buscar dados do usuário
+            const docSnap = await firestore
+              .collection("Usuario")
+              .doc(usuarioAutenticado.uid)
+              .get();
+
             if (docSnap.exists) {
               const dados = docSnap.data();
+
               setUsuario(prevState => ({
                 ...prevState,
                 nome: dados.nome || usuarioAutenticado.displayName || "Usuário",
@@ -42,20 +46,37 @@ export default function PerfilTrabalhador() {
                 telefone: dados.fone || "",
                 profissao: dados.profissao || "",
               }));
-            } else {
-              setUsuario(prevState => ({
-                ...prevState,
-                nome: usuarioAutenticado.displayName || "Usuário",
-                email: usuarioAutenticado.email || "",
-              }));
             }
+
+            // 🔹 Buscar histórico de serviços
+            const snapshot = await firestore
+              .collection("ServicosAdds")
+              .doc(usuarioAutenticado.uid)
+              .collection("ServicosOferecidos")
+              .get();
+
+            const lista = snapshot.docs.map(doc => {
+              const data = doc.data();
+              console.log('Documento:', doc.id, data); // Debug
+              return {
+                id: doc.id,
+                servico: data.estilo,
+                data: data.dataCriacao ? new Date(data.dataCriacao.seconds * 1000).toLocaleDateString('pt-BR') : 'Data não informada',
+                status: data.status || 'Finalizado',
+                valor: data.valor,
+                imagem: data.imagem,
+              };
+            });
+
+            console.log('Lista de serviços:', lista); // Debug
+            setHistorico(lista);
           }
         } catch (erro) {
-          console.log("Erro ao carregar dados do usuário:", erro);
+          console.log("Erro ao carregar dados:", erro);
         }
       };
 
-      carregarDadosUsuario();
+      carregarDados();
     }, [])
   );
 
@@ -71,39 +92,44 @@ export default function PerfilTrabalhador() {
     }
   };
 
-  const handleDeletarConta = () => {
+  const handleDeleteAccount = async () => {
     Alert.alert(
       "Deletar Conta",
-      "Tem certeza? Esta ação não pode ser desfeita. Todos os seus dados serão permanentemente removidos.",
+      "Tem certeza que deseja deletar sua conta? Esta ação não pode ser desfeita.",
       [
-        { text: "Cancelar", onPress: () => {}, style: "cancel" },
+        { text: "Cancelar", style: "cancel" },
         {
           text: "Deletar",
+          style: "destructive",
           onPress: async () => {
             try {
-              const usuarioId = auth.currentUser?.uid;
-              
+              const usuarioAutenticado = auth.currentUser;
+              if (!usuarioAutenticado) return;
+
               // Deletar dados do Firestore
-              if (usuarioId) {
-                await firestore.collection("Usuario").doc(usuarioId).delete();
-              }
+              await firestore.collection("Usuario").doc(usuarioAutenticado.uid).delete();
+              // Deletar serviços oferecidos
+              const servicosSnapshot = await firestore
+                .collection("ServicosAdds")
+                .doc(usuarioAutenticado.uid)
+                .collection("ServicosOferecidos")
+                .get();
+              const deletePromises = servicosSnapshot.docs.map(doc => doc.ref.delete());
+              await Promise.all(deletePromises);
 
-              // Deletar conta do Firebase Auth
-              await auth.currentUser?.delete();
+              // Deletar conta no Auth
+              await usuarioAutenticado.delete();
 
-              // Navegar para login
+              Alert.alert("Conta deletada", "Sua conta foi deletada com sucesso.");
               navigation.reset({
                 index: 0,
                 routes: [{ name: "LoginTrabalhador" }],
               });
-
-              Alert.alert("Sucesso", "Sua conta foi deletada com sucesso");
-            } catch (erro: any) {
+            } catch (erro) {
               console.log("Erro ao deletar conta:", erro);
-              Alert.alert("Erro", "Não foi possível deletar sua conta: " + erro.message);
+              Alert.alert("Erro", "Não foi possível deletar a conta.");
             }
           },
-          style: "destructive",
         },
       ]
     );
@@ -114,18 +140,22 @@ export default function PerfilTrabalhador() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <ArrowLeft size={24} color="#fff"  />
+          <ArrowLeft size={24} color="#fff" />
         </TouchableOpacity>
-        <Text style={{marginTop:40, marginBottom:4, fontSize: 28, fontWeight: "600", color: "#000"}}>Meu Perfil</Text>
-        <TouchableOpacity 
-          onPress={() => navigation.navigate("EditarPerfil")} 
-          style={{backgroundColor: "#005362", padding: 8, borderRadius: 8, marginBottom:4, marginTop:40}}
+
+        <Text style={{ marginTop: 40, marginBottom: 4, fontSize: 28, fontWeight: "600", color: "#000" }}>
+          Meu Perfil
+        </Text>
+
+        <TouchableOpacity
+          onPress={() => navigation.navigate("EditarPerfil")}
+          style={{ backgroundColor: "#005362", padding: 8, borderRadius: 8, marginBottom: 4, marginTop: 40 }}
         >
           <Edit2 size={20} color="#fff" />
         </TouchableOpacity>
       </View>
 
-      {/* Perfil Section */}
+      {/* Perfil */}
       <View style={styles.perfilSection}>
         <View style={styles.avatarContainer}>
           <View style={styles.avatar} />
@@ -143,10 +173,10 @@ export default function PerfilTrabalhador() {
         </View>
       </View>
 
-      {/* Informações de Contato */}
+      {/* Informações */}
       <View style={styles.contatoSection}>
         <Text style={styles.sectionTitle}>Informações de Contato</Text>
-        
+
         <View style={styles.infoItem}>
           <Phone size={18} color="#1e90ff" />
           <View style={styles.infoContent}>
@@ -172,14 +202,6 @@ export default function PerfilTrabalhador() {
         </View>
       </View>
 
-      {/* Descrição */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Sobre você</Text>
-        <View style={styles.descricaoBox}>
-          <Text style={styles.descricao}>{usuario.descricao}</Text>
-        </View>
-      </View>
-
       {/* Serviços oferecidos */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Serviços Oferecidos</Text>
@@ -197,41 +219,50 @@ export default function PerfilTrabalhador() {
 
       {/* Histórico */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Histórico de Serviços</Text>
-        {usuario.historico.map((item) => (
-          <View key={item.id} style={styles.historicoItem}>
-            <View style={styles.historicoLeft}>
-              <Calendar size={18} color="#1e90ff" />
-              <View style={styles.historicoContent}>
-                <Text style={styles.historicoServico}>{item.servico}</Text>
-                <Text style={styles.historicoData}>{item.data}</Text>
-              <View style={styles.historicoRight}>
-                <Text 
-                style={[
-                  styles.historicoStatus,
-                  item.status === "Concluído" && styles.statusConcluido
-                ]}
-              >
-                {item.status}
-                </Text>
-               </View>
-                <View style={styles.historicoRight}>
-                   <Text style={styles.historicoValor}>{item.valor}</Text>
+        <Text style={styles.sectionTitle}>Serviços Adicionados</Text>
+
+        {historico.length > 0 ? (
+          historico.map((item) => (
+            <View key={item.id} style={styles.historicoItem}>
+              <View style={styles.historicoLeft}>
+                {item.imagem ? (
+                  <Image source={{ uri: item.imagem }} style={styles.historicoImagem} />
+                ) : (
+                  <Calendar size={18} color="#1e90ff" />
+                )}
+                <View style={styles.historicoContent}>
+                  <Text style={styles.historicoServico}>{item.servico}</Text>
+                  <Text style={styles.historicoData}>{item.data}</Text>
+
+                  <Text
+                    style={[
+                      styles.historicoStatus,
+                      item.status === "Concluído" && styles.statusConcluido,
+                    ]}
+                  >
+                    {item.status}
+                  </Text>
+
+                  <Text style={styles.historicoValor}>
+                    R$ {item.valor}
+                  </Text>
                 </View>
               </View>
             </View>
-          </View>
-        ))}
+          ))
+        ) : (
+          <Text style={styles.nenhumTexto}>Nenhum serviço encontrado</Text>
+        )}
       </View>
 
-      {/* Logout Button */}
+      {/* Logout */}
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <LogOut size={20} color="#1e90ff" />
         <Text style={styles.logoutText}>Sair da conta</Text>
       </TouchableOpacity>
 
-      {/* Deletar Conta Button */}
-      <TouchableOpacity style={styles.deleteButton} onPress={handleDeletarConta}>
+      {/* Deletar Conta */}
+      <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteAccount}>
         <Text style={styles.deleteButtonText}>Deletar Conta</Text>
       </TouchableOpacity>
 

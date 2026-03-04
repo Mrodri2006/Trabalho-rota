@@ -682,6 +682,12 @@ export default StyleSheet.create({
     gap: 10,
   },
 
+  historicoImagem: {
+    width: 40,
+    height: 40,
+    borderRadius: 8,
+  },
+
   historicoServico: {
     fontSize: 14,
     fontWeight: "600",
