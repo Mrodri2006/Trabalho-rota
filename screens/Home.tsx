@@ -162,60 +162,6 @@ export default function TelaInicialCliente({ onLogout }: any) {
           <Text style={styles.sectionButtonArrow}>→</Text>
         </TouchableOpacity>
       )}
-
-      {/* Profissionais Recomendados */}
-      <Text style={styles.sectionTitle}>Recomendados para Você</Text>
-
-      {carregando ? (
-        <View style={styles.carregandoContainer}>
-          <ActivityIndicator size="large" color="#000" />
-          <Text style={styles.carregandoTexto}>Carregando profissionais...</Text>
-        </View>
-      ) : profissionaisFiltrados.length > 0 ? (
-        <View>
-          {profissionaisFiltrados.slice(0, 8).map((pro) => (
-            <TouchableOpacity
-              key={pro.id}
-              style={styles.recomendadoCard}
-              onPress={() => navigation.navigate("DetalheProfissional", { profissional: pro })}
-              activeOpacity={0.7}
-            >
-              <View style={styles.avatarRecomendado}>
-                <Text style={styles.avatarText}>
-                  {pro.nome.charAt(0).toUpperCase()}
-                </Text>
-              </View>
-              
-              <View style={{ flex: 1 }}>
-                <Text style={styles.nomeProf}>{pro.nome}</Text>
-                
-                <View style={styles.profissaoBadge}>
-                  <Text style={styles.profissaoTexto}>{pro.profissao}</Text>
-                </View>
-
-                <View style={styles.infoLinha}>
-                  <Star size={16} color="#FFD700" fill="#FFD700" />
-                  <Text style={styles.infoTxt}>{pro.avaliacao.toFixed(1)} avaliações</Text>
-                </View>
-
-                <View style={styles.infoLinha}>
-                  <MapPin size={16} color="#005362" />
-                  <Text style={styles.infoTxt}>{pro.distancia}</Text>
-                </View>
-              </View>
-
-              <TouchableOpacity 
-                style={styles.botaoChamar}
-                activeOpacity={0.8}
-              >
-                <Text style={styles.botaoTxt}>Chamar</Text>
-              </TouchableOpacity>
-            </TouchableOpacity>
-          ))}
-        </View>
-      ) : (
-        <Text style={styles.nenhumResultado}>Nenhum profissional encontrado</Text>
-      )}
     </ScrollView>
   );
 }

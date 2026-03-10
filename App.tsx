@@ -15,6 +15,7 @@ import DetalheProfissional from './screens/DetalheProfissional';
 import NovosPrestadores from './screens/NovosPrestadores';
 import PrestadoresPorServico from './screens/PrestadoresPorServico';
 import AddServico from './screens/AddServico';
+import ServStatus from './screens/ServStatus';
 
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -40,6 +41,7 @@ export default function App() {
         <Stack.Screen name='NovosPrestadores' component={NovosPrestadores} options={{ headerShown: false }}/>
         <Stack.Screen name='PrestadoresPorServico' component={PrestadoresPorServico} options={{ headerShown: false }}/>
         <Stack.Screen name='AddServico' component={AddServico} options={{ headerShown: false }}/>
+        <Stack.Screen name='ServStatus' component={ServStatus} options={{ headerShown: false }}/>
       </Stack.Navigator>
     </NavigationContainer>
     

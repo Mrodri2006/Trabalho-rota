@@ -3,7 +3,7 @@ import { createDrawerNavigator } from "@react-navigation/drawer";
 
 import HomeTrabalhador from "./HomeTrabalhador";
 import Serv from "./Serv";
-import ServListar from "./ServListar";
+import ServListar from "./ServStatus";
 
 const Drawer = createDrawerNavigator();
 

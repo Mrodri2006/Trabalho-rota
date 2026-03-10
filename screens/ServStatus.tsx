@@ -1,4 +1,4 @@
-/*import { useState } from 'react';
+import { useState } from 'react';
 import {  FlatList, Text, TouchableOpacity, ImageBackground } from 'react-native';
 import { auth, firestore } from '../firebase';
 import { useNavigation } from '@react-navigation/native';
@@ -54,7 +54,7 @@ export default function ListarServ() {
     }
 
     return (
-        <ImageBackground source={require('../assets/back.png')} resizeMode='stretch' style={styles.container}>
+        <ImageBackground resizeMode='stretch' style={styles.container}>
             <FlatList
                 data={servs}
                 renderItem={({ item }) => (
@@ -70,4 +70,3 @@ export default function ListarServ() {
         </ImageBackground>
     )
 }
-*/
