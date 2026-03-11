@@ -49,6 +49,28 @@ export default function DetalheProfissional() {
     }
   };
 
+  const handleSolicitarServico = (servico: any) => {
+    navigation.navigate("SolicitarServico", {
+      prestadorId: profissional.id,
+      prestadorNome: profissional.nome,
+      servico: servico.tipo || servico.nome || servico.estilo,
+    });
+  };
+
+  const handleSolicitarServicoPrincipal = () => {
+    // Se houver serviços, solicita o primeiro
+    if (servicos.length > 0) {
+      handleSolicitarServico(servicos[0]);
+    } else {
+      // Caso contrário, abre com a profissão do prestador
+      navigation.navigate("SolicitarServico", {
+        prestadorId: profissional.id,
+        prestadorNome: profissional.nome,
+        servico: profissional.profissao,
+      });
+    }
+  };
+
   if (carregando) {
     return (
       <View style={styles.carregandoContainer}>
@@ -129,8 +151,13 @@ export default function DetalheProfissional() {
 
         {servicos.length > 0 ? (
           servicos.map((servico, index) => (
-            <View key={servico.id} style={styles.servicoCard}>
-              <Text style={styles.servicoNome}>{servico.nome}</Text>
+            <TouchableOpacity 
+              key={servico.id} 
+              style={styles.servicoCard}
+              activeOpacity={0.7}
+              onPress={() => handleSolicitarServico(servico)}
+            >
+              <Text style={styles.servicoNome}>{servico.nome || servico.tipo || servico.estilo}</Text>
               <Text style={styles.servicoTipo}>Tipo: {servico.tipo}</Text>
               {servico.local && (
                 <Text style={styles.servicoLocal}>Local: {servico.local}</Text>
@@ -138,7 +165,8 @@ export default function DetalheProfissional() {
               {servico.data && (
                 <Text style={styles.servicoData}>Data: {servico.data}</Text>
               )}
-            </View>
+              <Text style={styles.servicoAcao}>👉 Toque para solicitar</Text>
+            </TouchableOpacity>
           ))
         ) : (
           <Text style={styles.nenhumServico}>Nenhum serviço cadastrado</Text>
@@ -147,7 +175,10 @@ export default function DetalheProfissional() {
 
       {/* Botão de Ação */}
       <View style={styles.acaoContainer}>
-        <TouchableOpacity style={styles.botaoContratar}>
+        <TouchableOpacity 
+          style={styles.botaoContratar}
+          onPress={handleSolicitarServicoPrincipal}
+        >
           <Phone size={20} color="#fff" />
           <Text style={styles.botaoContrataTexto}>Solicitar Serviço</Text>
         </TouchableOpacity>
@@ -307,6 +338,13 @@ const styles = StyleSheet.create({
   servicoData: {
     fontSize: 12,
     color: "#999",
+  },
+
+  servicoAcao: {
+    fontSize: 12,
+    color: "#527954",
+    fontWeight: "600",
+    marginTop: 8,
   },
 
   nenhumServico: {

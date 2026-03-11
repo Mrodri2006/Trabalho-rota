@@ -93,6 +93,13 @@ export default function TelaInicialCliente({ onLogout }: any) {
     });
   };
 
+  // Função para navegar aos detalhes do profissional
+  const handleProfissionalPress = (profissional: any) => {
+    navigation.navigate("DetalheProfissional", { 
+      profissional: profissional,
+    });
+  };
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
@@ -147,6 +154,32 @@ export default function TelaInicialCliente({ onLogout }: any) {
       )}
 
       {/* Usuários Recentes */}
+      {!carregando && profissionaisFiltrados.length > 0 && (
+        <>
+          <Text style={styles.sectionTitle}>Profissionais Recomendados</Text>
+          {profissionaisFiltrados.slice(0, 5).map((prof) => (
+            <TouchableOpacity
+              key={prof.id}
+              style={styles.recomendadoCard}
+              activeOpacity={0.7}
+              onPress={() => handleProfissionalPress(prof)}
+            >
+              <View style={styles.avatarRecomendado}>
+                <Text style={styles.avatarText}>
+                  {prof.nome.charAt(0).toUpperCase()}
+                </Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.nomeProf}>{prof.nome}</Text>
+                <View style={styles.profissaoBadge}>
+                  <Text style={styles.profissaoTexto}>{prof.profissao}</Text>
+                </View>
+              </View>
+            </TouchableOpacity>
+          ))}
+        </>
+      )}
+
       {!carregando && (
         <TouchableOpacity
           style={styles.sectionButtonContainer}

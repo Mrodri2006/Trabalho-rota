@@ -59,6 +59,14 @@ export default function PrestadoresPorServico() {
     }
   };
 
+  const handleChamar = (prestador: any) => {
+    navigation.navigate("SolicitarServico", {
+      prestadorId: prestador.id,
+      prestadorNome: prestador.nome,
+      servico: servico,
+    });
+  };
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
@@ -121,7 +129,11 @@ export default function PrestadoresPorServico() {
                 <Text style={styles.emailTexto}>{prestador.email}</Text>
               </View>
 
-              <TouchableOpacity style={styles.botaoChamar} activeOpacity={0.8}>
+              <TouchableOpacity 
+                style={styles.botaoChamar} 
+                activeOpacity={0.8}
+                onPress={() => handleChamar(prestador)}
+              >
                 <Text style={styles.botaoTxt}>Chamar</Text>
               </TouchableOpacity>
             </View>
