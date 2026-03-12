@@ -67,7 +67,7 @@ export default function AddServico() {
           dataCriacao: new Date(),
         });
 
-      Alert.alert('Sucesso', 'Serviço adicionado com sucesso!');
+      Alert.alert('Sucessos', 'Serviço adicionado com sucesso!');
       navigation.goBack();
     } catch (error) {
       console.error('Erro ao salvar serviço:', error);

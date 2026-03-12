@@ -90,7 +90,7 @@ export default function Login() {
                 style={{ width: 400, height: 100, marginVertical: 10, }}
                 />
 
-              <Text style={styles.subtitulo}>Bem-vindo de volta</Text>
+              {/* <Text style={styles.subtitulo}>Bem-vindo de volta</Text> */}
             </View>
 
             <View style={styles.tabContainer}>
