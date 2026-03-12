@@ -29,9 +29,9 @@ export default function ServicosAgendados() {
       if (!usuarioId) return;
 
       const docSnap = await firestore
-        .collection("Servicos")
-        .doc(usuarioId)
         .collection("ServicosAgendados")
+        .doc(usuarioId)
+        .collection("ServicoStatus")
         .get();
 
       const servicos = docSnap.docs.map((doc) => ({
@@ -47,10 +47,10 @@ export default function ServicosAgendados() {
     }
   };
 
-  const handleCancelarServico = async (firestoreId: string, titulo: string) => {
+  const handleCancelarServico = async (firestoreId: string, estilo: string) => {
     Alert.alert(
       "Cancelar Serviço",
-      `Deseja cancelar o serviço "${titulo}"?`,
+      `Deseja cancelar o serviço "${estilo}"?`,
       [
         { text: "Cancelar", onPress: () => {}, style: "cancel" },
         {
@@ -59,11 +59,11 @@ export default function ServicosAgendados() {
             try {
               const usuarioId = auth.currentUser?.uid;
               if (!usuarioId) return;
-
+  
               await firestore
-                .collection("Servicos")
-                .doc(usuarioId)
                 .collection("ServicosAgendados")
+                .doc(usuarioId)
+                .collection("ServicoStatus")
                 .doc(firestoreId)
                 .delete();
 
@@ -118,21 +118,21 @@ export default function ServicosAgendados() {
           {servicosAgendados.map((item) => (
             <View key={item.firestoreId} style={styles.card}>
               <View style={styles.cardHeader}>
-                <Text style={styles.cardTitle}>{item.titulo}</Text>
+              <Text style={styles.cardTitle}>
+               {item.estilo || item.tipo || item.estilo}
+              </Text>
                 <View style={styles.statusBadge}>
                   <CheckCircle size={16} color="#fff" />
                   <Text style={styles.statusText}>Agendado</Text>
                 </View>
               </View>
 
-              <View style={styles.row}>
-                <MapPin size={18} color="#1e90ff" />
-                <Text style={styles.infoText}>{item.distancia}</Text>
-              </View>
 
               <View style={styles.row}>
                 <Clock size={18} color="#1e90ff" />
-                <Text style={styles.infoText}>{item.horario}</Text>
+                <Text style={styles.infoText}>
+                 {item.horario || "Horário não informado"}
+                </Text>
               </View>
 
               <View style={styles.buttonsRow}>
@@ -145,7 +145,7 @@ export default function ServicosAgendados() {
 
                 <TouchableOpacity
                   style={styles.cancelButton}
-                  onPress={() => handleCancelarServico(item.firestoreId, item.titulo)}
+                  onPress={() => handleCancelarServico(item.firestoreId, item.estilo)}
                 >
                   <X size={18} color="#ff5252" />
                 </TouchableOpacity>
