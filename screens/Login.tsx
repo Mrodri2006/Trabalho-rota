@@ -87,10 +87,8 @@ export default function Login() {
              
               <Image
                 source={require('../assets/logo8.jpg')}
-                style={{ width: 400, height: 100, marginVertical: 10, }}
+                style={{ width: 400, height: 100, marginBottom: 20, }}
                 />
-
-              {/* <Text style={styles.subtitulo}>Bem-vindo de volta</Text> */}
             </View>
 
             <View style={styles.tabContainer}>
@@ -202,6 +200,7 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     marginBottom: 25,
     overflow: 'hidden',
+    margin: 20,
   },
 
   activeTab: {

@@ -7,7 +7,8 @@ import {
   ImageBackground,
   ActivityIndicator,
   StyleSheet,
-  ScrollView
+  ScrollView,
+  Image
 } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import { auth, firestore } from '../firebase';
@@ -93,17 +94,20 @@ export default function Register2() {
 
   return (
     <KeyboardAvoidingView behavior="padding" style={styles.container}>
-      <ImageBackground
-        source={require('../assets/imagem.jpg')}
-        resizeMode='cover'
-        style={styles.container}
-      >
         <View style={styles.overlay}>
           <ScrollView contentContainerStyle={styles.scroll}>
 
             <View style={styles.headerSection}>
               <Text style={styles.titulo}>CADASTRO DE USUÁRIOS</Text>
-              <Text style={styles.subtitulo}>Crie sua conta agora</Text>
+                  <Image
+                    source={require('../assets/logo8.jpg')}
+                    style={{ 
+                      width: 400, 
+                      height: 100, 
+                      marginVertical: 10, 
+                      marginTop: 40, 
+                    }}
+                  />
             </View>
 
             <View style={styles.tabContainer}>
@@ -197,50 +201,105 @@ export default function Register2() {
 
           </ScrollView>
         </View>
-      </ImageBackground>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-
-  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.55)' },
-
-  scroll: { paddingHorizontal: 25, paddingVertical: 40 },
-
-  headerSection: { alignItems: 'center', marginBottom: 25 },
-
-  titulo: { fontSize: 22, fontWeight: 'bold', color: '#fff', textAlign: 'center' },
-
-  subtitulo: { fontSize: 14, color: '#ddd', marginTop: 5 },
-
+  container: { 
+    flex: 1 ,
+    backgroundColor: '#000',
+  },
+  overlay: { 
+    flex: 1, 
+    backgroundColor: 'rgba(0,0,0,0.55)' 
+  },
+  scroll: { 
+    paddingHorizontal: 25, 
+    paddingVertical: 40 
+  },
+  headerSection:{ 
+    alignItems: 'center', 
+    marginBottom: 25 
+  },
+  titulo: { 
+    fontSize: 22, 
+    fontWeight: 'bold', 
+    color: '#fff', 
+    textAlign: 'center',
+    marginTop: 10, 
+  },
+  subtitulo: { 
+    fontSize: 14, 
+    color: '#ddd', 
+    marginTop: 5 
+  },
   tabContainer: {
     flexDirection: 'row',
     backgroundColor: '#fff',
     borderRadius: 30,
     marginBottom: 25,
     overflow: 'hidden',
+    margin: 20,
   },
-
-  activeTab: { flex: 1, backgroundColor: '#005362', padding: 12, alignItems: 'center' },
-  inactiveTab: { flex: 1, padding: 12, alignItems: 'center' },
-
-  activeTabText: { color: '#fff', fontWeight: 'bold' },
-  inactiveTabText: { color: '#005362', fontWeight: 'bold' },
-
-  card: { backgroundColor: '#fff', padding: 20, borderRadius: 20, elevation: 6 },
-
-  input: { marginBottom: 12, backgroundColor: '#fff' },
-
-  dateButton: { justifyContent: 'center', paddingVertical: 12 },
-  dateButtonText: { color: '#555' },
-
-  registerButton: { backgroundColor: '#005362', padding: 14, borderRadius: 12, alignItems: 'center', marginTop: 10 },
-  buttonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
-
-  backButton: { marginTop: 15, alignItems: 'center' },
-  backButtonText: { color: '#005362', fontWeight: '600' },
-
-  errorText: { color: '#ff4d4d', marginBottom: 6 },
+  activeTab: { 
+    flex: 1, 
+    backgroundColor: '#005362', 
+    padding: 12, 
+    alignItems: 'center'
+  },
+  inactiveTab: { 
+    flex: 1, 
+    padding: 12, 
+    alignItems: 'center' 
+  },
+  activeTabText: { 
+    color: '#fff', 
+    fontWeight: 'bold' 
+  },
+  inactiveTabText: { 
+    color: '#005362', 
+    fontWeight: 'bold' 
+  },
+  card: { 
+    backgroundColor: '#fff', 
+    padding: 20, 
+    borderRadius: 20, 
+    elevation: 6 
+  },
+  input: { 
+    marginBottom: 12, 
+    backgroundColor: '#fff' 
+  },
+  dateButton: { 
+    justifyContent: 'center', 
+    paddingVertical: 12 
+  },
+  dateButtonText: { 
+    color: '#555' 
+  },
+  registerButton: { 
+    backgroundColor: '#005362', 
+    padding: 14, 
+    borderRadius: 12, 
+    alignItems: 'center', 
+    marginTop: 10 
+  },
+  buttonText: { 
+    color: '#fff', 
+    fontWeight: 'bold', 
+    fontSize: 16 
+  },
+  backButton: { 
+    marginTop: 15, 
+    alignItems: 'center' 
+  },
+  backButtonText: { 
+    color: '#005362', 
+    fontWeight: '600' 
+  },
+  errorText: { 
+    color: '#ff4d4d', 
+    marginBottom: 6 
+  },
 });
