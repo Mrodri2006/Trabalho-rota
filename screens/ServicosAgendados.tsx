@@ -126,19 +126,18 @@ export default function ServicosAgendados() {
             {servicosAgendados.length !== 1 ? "s" : ""}
           </Text>
 
-          {/*{servicosAgendados.map((item) => {
-            // IF para mostrar somente serviços aceitos
-            if (item.status == "aceito"){ 
+          {servicosAgendados.map((servicoStatus) => {
+            if (servicoStatus.status == "aceito"){ 
               return servicosAgendados;
-            } else if (item.status == "recusado"){
+            } else if (servicoStatus.status == "não realizado"){
               return null;
-            }*/}
+            }
 
             return (
-              <View key={item.firestoreId} style={styles.card}>
+              <View key={servicoStatus.firestoreId} style={styles.card}>
                 <View style={styles.cardHeader}>
                   <Text style={styles.cardTitle}>
-                    {item.titulo || item.tipo || item.estilo}
+                    {servicoStatus.titulo || servicoStatus.tipo || servicoStatus.estilo}
                   </Text>
 
                   <View style={styles.statusBadge}>
@@ -150,7 +149,7 @@ export default function ServicosAgendados() {
                 <View style={styles.row}>
                   <Clock size={18} color="#1e90ff" />
                   <Text style={styles.infoText}>
-                    {item.horario || "Horário não informado"}
+                    {servicoStatus.horario || "Horário não informado"}
                   </Text>
                 </View>
 
@@ -170,7 +169,7 @@ export default function ServicosAgendados() {
                   <TouchableOpacity
                     style={styles.cancelButton}
                     onPress={() =>
-                      handleCancelarServico(item.firestoreId, item.titulo)
+                      handleCancelarServico(servicoStatus.firestoreId, servicoStatus.titulo)
                     }
                   >
                     <X size={18} color="#ff5252" />
