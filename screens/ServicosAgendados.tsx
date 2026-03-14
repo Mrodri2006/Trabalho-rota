@@ -5,7 +5,7 @@ import {
   ScrollView,
   Alert,
 } from "react-native";
-import { ArrowLeft, MapPin, Clock, CheckCircle, X } from "lucide-react-native";
+import { ArrowLeft, Clock, CheckCircle, X } from "lucide-react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { useState, useCallback } from "react";
 import { auth, firestore } from "../firebase";
@@ -16,7 +16,6 @@ export default function ServicosAgendados() {
   const [servicosAgendados, setServicosAgendados] = useState([]);
   const [carregando, setCarregando] = useState(true);
 
-  // Carregar serviços agendados do Firebase
   useFocusEffect(
     useCallback(() => {
       carregarServicosAgendados();
@@ -52,9 +51,10 @@ export default function ServicosAgendados() {
       "Cancelar Serviço",
       `Deseja cancelar o serviço "${titulo}"?`,
       [
-        { text: "Cancelar", onPress: () => {}, style: "cancel" },
+        { text: "Cancelar", style: "cancel" },
         {
           text: "Confirmar",
+          style: "destructive",
           onPress: async () => {
             try {
               const usuarioId = auth.currentUser?.uid;
@@ -77,7 +77,6 @@ export default function ServicosAgendados() {
               Alert.alert("Erro", "Não foi possível cancelar o serviço");
             }
           },
-          style: "destructive",
         },
       ]
     );
@@ -90,7 +89,19 @@ export default function ServicosAgendados() {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <ArrowLeft size={24} color="#fff" />
         </TouchableOpacity>
-        <Text style={{marginTop:40, marginBottom:4, fontSize: 28, fontWeight: "600", color: "#000"}}>Serviços Agendados</Text>
+
+        <Text
+          style={{
+            marginTop: 40,
+            marginBottom: 4,
+            fontSize: 28,
+            fontWeight: "600",
+            color: "#000",
+          }}
+        >
+          Serviços Agendados
+        </Text>
+
         <View style={{ width: 24 }} />
       </View>
 
@@ -115,46 +126,61 @@ export default function ServicosAgendados() {
             {servicosAgendados.length !== 1 ? "s" : ""}
           </Text>
 
-          {servicosAgendados.map((item) => (
-            <View key={item.firestoreId} style={styles.card}>
-              <View style={styles.cardHeader}>
-              <Text style={styles.cardTitle}>
-               {item.titulo || item.tipo || item.estilo}
-              </Text>
-                <View style={styles.statusBadge}>
-                  <CheckCircle size={16} color="#fff" />
-                  <Text style={styles.statusText}>Agendado</Text>
+          {/*{servicosAgendados.map((item) => {
+            // IF para mostrar somente serviços aceitos
+            if (item.status == "aceito"){ 
+              return servicosAgendados;
+            } else if (item.status == "recusado"){
+              return null;
+            }*/}
+
+            return (
+              <View key={item.firestoreId} style={styles.card}>
+                <View style={styles.cardHeader}>
+                  <Text style={styles.cardTitle}>
+                    {item.titulo || item.tipo || item.estilo}
+                  </Text>
+
+                  <View style={styles.statusBadge}>
+                    <CheckCircle size={16} color="#fff" />
+                    <Text style={styles.statusText}>Agendado</Text>
+                  </View>
+                </View>
+
+                <View style={styles.row}>
+                  <Clock size={18} color="#1e90ff" />
+                  <Text style={styles.infoText}>
+                    {item.horario || "Horário não informado"}
+                  </Text>
+                </View>
+
+                <View style={styles.buttonsRow}>
+                  <TouchableOpacity
+                    style={styles.contatoButton}
+                    onPress={() =>
+                      Alert.alert(
+                        "Contato",
+                        "Funcionalidade em desenvolvimento"
+                      )
+                    }
+                  >
+                    <Text style={styles.buttonText}>Contatar Cliente</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.cancelButton}
+                    onPress={() =>
+                      handleCancelarServico(item.firestoreId, item.titulo)
+                    }
+                  >
+                    <X size={18} color="#ff5252" />
+                  </TouchableOpacity>
                 </View>
               </View>
-
-
-              <View style={styles.row}>
-                <Clock size={18} color="#1e90ff" />
-                <Text style={styles.infoText}>
-                 {item.horario || "Horário não informado"}
-                </Text>
-              </View>
-
-              <View style={styles.buttonsRow}>
-                <TouchableOpacity
-                  style={styles.contatoButton}
-                  onPress={() => Alert.alert("Contato", "Funcionalidade em desenvolvimento")}
-                >
-                  <Text style={styles.buttonText}>Contatar Cliente</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.cancelButton}
-                  onPress={() => handleCancelarServico(item.firestoreId, item.titulo)}
-                >
-                  <X size={18} color="#ff5252" />
-                </TouchableOpacity>
-              </View>
-            </View>
-          ))}
+            );
+          })}
         </View>
       )}
     </ScrollView>
   );
 }
-

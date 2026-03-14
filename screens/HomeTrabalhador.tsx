@@ -14,6 +14,7 @@ import { MapPin, Clock, Plus, User, CheckCircle, X } from "lucide-react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { useState, useCallback, useRef } from "react";
 import { auth, firestore } from "../firebase";
+import { Calendar } from "lucide-react-native";
 
 export default function HomeTrabalhador() {
   const navigation = useNavigation();
@@ -167,6 +168,14 @@ export default function HomeTrabalhador() {
         >
           <User size={24} />
         </TouchableOpacity>
+
+        <View>
+        <TouchableOpacity
+         style={styles.iconButton}
+         onPress={() => (navigation as any).navigate("ServicosAgendados")}> 
+        <Calendar size={24} />
+       </TouchableOpacity>
+      </View>
       </View>
 
       <Text style={styles.sectionTitle}>Serviços Solicitados</Text>
@@ -353,6 +362,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: "#f0f0f0",
     marginTop: 40,
+    flexDirection: "row",
   },
 
   sectionTitle: {
