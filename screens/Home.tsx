@@ -1,6 +1,6 @@
 
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator } from "react-native";
-import { Search, MapPin, Star, User, Wrench, LogOut, X } from "lucide-react-native";
+import { Search, Star, User, Wrench, X, Clock } from "lucide-react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { useState, useCallback } from "react";
 import { firestore } from "../firebase";
@@ -53,7 +53,6 @@ export default function TelaInicialCliente({ onLogout }: any) {
         }
       }
 
-      // Converter Map em Array e criar objetos de serviço com ícones
       const servicosArray = Array.from(servicosUnicos)
         .sort((a, b) => a[0].localeCompare(b[0]))
         .map((item, index) => ({
@@ -111,6 +110,12 @@ export default function TelaInicialCliente({ onLogout }: any) {
             <User size={24} />
           </TouchableOpacity>
 
+          //se basear na tela de ServicosAgendados para essa
+<TouchableOpacity style={styles.iconButton} 
+            onPress={() => navigation.navigate("ServicosEmAndamento")}>
+            <Clock size={24} />
+            </TouchableOpacity>
+
         </View>
       </View>
 
@@ -132,7 +137,6 @@ export default function TelaInicialCliente({ onLogout }: any) {
         )}
       </View>
 
-      {/* Serviços Populares */}
       <Text style={styles.sectionTitle}>Serviços Populares</Text>
 
       {servicosFiltrados.length > 0 ? (

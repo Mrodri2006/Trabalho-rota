@@ -21,6 +21,7 @@ import ServStatus from './screens/ServStatus';
 
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import ServicosEmAndamento from './screens/ServicosEmAndamento';
 
 const Stack = createNativeStackNavigator();
 
@@ -45,6 +46,7 @@ export default function App() {
         <Stack.Screen name='SolicitarServico' component={SolicitarServico} options={{ headerShown: false }}/>
         <Stack.Screen name='AddServico' component={AddServico} options={{ headerShown: false }}/>
         <Stack.Screen name='ServStatus' component={ServStatus} options={{ headerShown: false }}/>
+        <Stack.Screen name='ServicosEmAndamento'    component={ServicosEmAndamento} options={{ headerShown: false }} /> 
       </Stack.Navigator>
     </NavigationContainer>
     

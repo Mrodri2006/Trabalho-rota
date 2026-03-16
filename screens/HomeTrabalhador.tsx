@@ -117,7 +117,7 @@ export default function HomeTrabalhador() {
       }
 
       await firestore
-        .collection("ServicosAgendados")
+        .collection("ServicosRejeitados")
         .doc(usuarioId)
         .collection("ServicoStatus")
         .doc(servico.id)

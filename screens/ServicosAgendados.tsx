@@ -126,18 +126,16 @@ export default function ServicosAgendados() {
             {servicosAgendados.length !== 1 ? "s" : ""}
           </Text>
 
-          {servicosAgendados.map((servicoStatus) => {
-            if (servicoStatus.status == "aceito"){ 
-              return servicosAgendados;
-            } else if (servicoStatus.status == "não realizado"){
-              return null;
-            }
-
-            return (
+          {/* Mostrar somente serviços "a fazer" */}
+          {servicosAgendados
+            .filter((servico) => servico.status === "a fazer")
+            .map((servicoStatus) => (
               <View key={servicoStatus.firestoreId} style={styles.card}>
                 <View style={styles.cardHeader}>
                   <Text style={styles.cardTitle}>
-                    {servicoStatus.titulo || servicoStatus.tipo || servicoStatus.estilo}
+                    {servicoStatus.titulo ||
+                      servicoStatus.tipo ||
+                      servicoStatus.estilo}
                   </Text>
 
                   <View style={styles.statusBadge}>
@@ -169,15 +167,17 @@ export default function ServicosAgendados() {
                   <TouchableOpacity
                     style={styles.cancelButton}
                     onPress={() =>
-                      handleCancelarServico(servicoStatus.firestoreId, servicoStatus.titulo)
+                      handleCancelarServico(
+                        servicoStatus.firestoreId,
+                        servicoStatus.titulo
+                      )
                     }
                   >
                     <X size={18} color="#ff5252" />
                   </TouchableOpacity>
                 </View>
               </View>
-            );
-          })}
+            ))}
         </View>
       )}
     </ScrollView>

@@ -1,4 +1,4 @@
-export interface IAval {
+/*export interface IAval {
   id?: number;
   titulo?: string;
   descricao?: string;
@@ -54,4 +54,4 @@ export default class Aval implements IAval {
     if (this.titulo && this.titulo.length > 100) return 'Título muito longo';
     return null;
   }
-}
+}*/
