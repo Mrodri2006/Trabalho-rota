@@ -60,7 +60,7 @@ export default function HomeTrabalhador() {
           snapshot.forEach((doc) => {
             const data = doc.data();
 
-            if (data.status === "não realizado") {
+            if (data.status === "não realizado" || data.status === "aguardando" || !data.status) {
               servicos.push({
                 id: doc.id,
                 ...data,
@@ -98,6 +98,18 @@ export default function HomeTrabalhador() {
           dataAceito: new Date(),
         });
 
+      if (servico.clienteId) {
+        await firestore
+          .collection("ServicosClientes")
+          .doc(servico.clienteId)
+          .collection("ServicoStatus")
+          .doc(servico.id)
+          .update({
+            status: "a fazer",
+            dataAceito: new Date(),
+          });
+      }
+
       setServicoAceito(servico);
       setServicoRejeitado(null);
       setAlertVisivel(true);
@@ -127,6 +139,18 @@ export default function HomeTrabalhador() {
           dataRejeicao: new Date(),
         })
         ;
+
+      if (servico.clienteId) {
+        await firestore
+          .collection("ServicosClientes")
+          .doc(servico.clienteId)
+          .collection("ServicoStatus")
+          .doc(servico.id)
+          .update({
+            status: "rejeitado",
+            dataRejeicao: new Date(),
+          });
+      }
 
       setServicoRejeitado(servico);
       setServicoAceito(null);

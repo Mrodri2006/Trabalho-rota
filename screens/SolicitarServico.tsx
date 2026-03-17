@@ -39,7 +39,7 @@ export default function SolicitarServico() {
         data: data,
         local: local,
         descricao: descricao,
-        status: 'a fazer',
+        status: 'aguardando',
         clienteId: usuarioLogado,
         dataSolicitacao: new Date(),
         criadoEm: new Date(),
@@ -49,6 +49,13 @@ export default function SolicitarServico() {
       await firestore
         .collection("ServicosAgendados")
         .doc(prestadorId)
+        .collection("ServicoStatus")
+        .doc(novoServico.id)
+        .set(novoServico);
+
+      await firestore
+        .collection("ServicosClientes")
+        .doc(usuarioLogado)
         .collection("ServicoStatus")
         .doc(novoServico.id)
         .set(novoServico);

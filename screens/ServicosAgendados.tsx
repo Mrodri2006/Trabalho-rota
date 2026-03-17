@@ -118,11 +118,6 @@ export default function ServicosAgendados() {
         </View>
       ) : (
         <View style={styles.content}>
-          <Text style={styles.sectionTitle}>
-            Você tem {servicosAgendados.length} serviço
-            {servicosAgendados.length !== 1 ? "s" : ""} agendado
-            {servicosAgendados.length !== 1 ? "s" : ""}
-          </Text>
 
           {servicosAgendados
             .filter((servico) => servico.status === "a fazer")

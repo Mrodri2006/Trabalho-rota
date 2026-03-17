@@ -1,9 +1,9 @@
 
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator } from "react-native";
-import { Search, Star, User, Wrench, X, Clock } from "lucide-react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Modal, Alert } from "react-native";
+import { Search, User, Wrench, X } from "lucide-react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
-import { useState, useCallback } from "react";
-import { firestore } from "../firebase";
+import { useState, useCallback, useRef } from "react";
+import { auth, firestore } from "../firebase";
 
 export default function TelaInicialCliente({ onLogout }: any) {
 
@@ -12,10 +12,23 @@ export default function TelaInicialCliente({ onLogout }: any) {
   const [profissionaisRecomendados, setProfissionaisRecomendados] = useState([]);
   const [servicosPopulares, setServicosPopulares] = useState([]);
   const [carregando, setCarregando] = useState(true);
+  const [servicosAceitos, setServicosAceitos] = useState<any[]>([]);
+  const [carregandoAceitos, setCarregandoAceitos] = useState(true);
+  const [modalVisivel, setModalVisivel] = useState(false);
+  const [servicoSelecionado, setServicoSelecionado] = useState<any>(null);
+  const [problemaTexto, setProblemaTexto] = useState("");
+
+  const unsubscribeAceitosRef = useRef<any>(null);
 
   useFocusEffect(
     useCallback(() => {
       buscarDadosFirebase();
+      carregarServicosAceitos();
+      return () => {
+        if (unsubscribeAceitosRef.current) {
+          unsubscribeAceitosRef.current();
+        }
+      };
     }, [])
   );
 
@@ -92,6 +105,103 @@ export default function TelaInicialCliente({ onLogout }: any) {
     });
   };
 
+  const carregarServicosAceitos = () => {
+    const usuarioId = auth.currentUser?.uid;
+    if (!usuarioId) {
+      setCarregandoAceitos(false);
+      return;
+    }
+
+    setCarregandoAceitos(true);
+
+    if (unsubscribeAceitosRef.current) {
+      unsubscribeAceitosRef.current();
+    }
+
+    unsubscribeAceitosRef.current = firestore
+      .collection("ServicosClientes")
+      .doc(usuarioId)
+      .collection("ServicoStatus")
+      .onSnapshot(
+        (snapshot) => {
+          const lista = snapshot.docs
+            .map((doc) => {
+              const data = doc.data();
+              return {
+                ...data,
+                id: doc.id,
+              };
+            })
+            .filter((item) => item.status === "a fazer" || item.status === "aceito");
+          setServicosAceitos(lista);
+          setCarregandoAceitos(false);
+        },
+        (erro) => {
+          console.error("Erro ao buscar serviços aceitos:", erro);
+          setCarregandoAceitos(false);
+        }
+      );
+  };
+
+  const abrirModal = (servico: any) => {
+    setServicoSelecionado(servico);
+    setProblemaTexto("");
+    setModalVisivel(true);
+  };
+
+  const fecharModal = () => {
+    setModalVisivel(false);
+    setServicoSelecionado(null);
+    setProblemaTexto("");
+  };
+
+  const atualizarStatusServico = async (novoStatus: string) => {
+    if (!servicoSelecionado?.prestadorId || !servicoSelecionado?.clienteId) {
+      Alert.alert("Erro", "Informações do serviço incompletas");
+      return;
+    }
+
+    try {
+      await firestore
+        .collection("ServicosAgendados")
+        .doc(servicoSelecionado.prestadorId)
+        .collection("ServicoStatus")
+        .doc(servicoSelecionado.id)
+        .update({
+          status: novoStatus,
+          dataAtualizacao: new Date(),
+          ...(novoStatus === "problema"
+            ? { problemaRelatado: problemaTexto || "Problema reportado" }
+            : { problemaRelatado: null }),
+          ...(novoStatus === "realizado"
+            ? { dataFinalizado: new Date() }
+            : {}),
+        });
+
+      await firestore
+        .collection("ServicosClientes")
+        .doc(servicoSelecionado.clienteId)
+        .collection("ServicoStatus")
+        .doc(servicoSelecionado.id)
+        .update({
+          status: novoStatus,
+          dataAtualizacao: new Date(),
+          ...(novoStatus === "problema"
+            ? { problemaRelatado: problemaTexto || "Problema reportado" }
+            : { problemaRelatado: null }),
+          ...(novoStatus === "realizado"
+            ? { dataFinalizado: new Date() }
+            : {}),
+        });
+
+      Alert.alert("Sucesso", `Serviço atualizado para "${novoStatus}"`);
+      fecharModal();
+    } catch (erro) {
+      console.error("Erro ao atualizar serviço:", erro);
+      Alert.alert("Erro", "Não foi possível atualizar o serviço");
+    }
+  };
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
@@ -100,13 +210,6 @@ export default function TelaInicialCliente({ onLogout }: any) {
         <View style={styles.headerButtons}>
           <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate("Perfil")}>
             <User size={24} />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.iconButton}
-            onPress={() => navigation.navigate("ServicosEmAndamento")}
-          >
-            <Clock size={24} />
           </TouchableOpacity>
 
         </View>
@@ -131,7 +234,12 @@ export default function TelaInicialCliente({ onLogout }: any) {
 
       <Text style={styles.sectionTitle}>Serviços Populares</Text>
 
-      {servicosFiltrados.length > 0 ? (
+      {carregando ? (
+        <View style={styles.carregandoContainer}>
+          <ActivityIndicator size="large" color="#005362" />
+          <Text style={styles.carregandoTexto}>Carregando serviços...</Text>
+        </View>
+      ) : servicosFiltrados.length > 0 ? (
         <View style={styles.grid}>
           {servicosFiltrados.map((serv) => {
             const quantidadeProf = contarProfissionaisPorServico(serv.nome);
@@ -140,7 +248,7 @@ export default function TelaInicialCliente({ onLogout }: any) {
                 <View style={styles.iconCenter}>{serv.icon}</View>
                 <Text style={styles.cardText}>{serv.nome}</Text>
                 <View style={styles.badgeContainer}>
-                  <Text style={styles.badgeTexto}>{quantidadeProf} profissional{quantidadeProf !== 1 ? "is" : ""}</Text>
+                  <Text style={styles.badgeTexto}>{quantidadeProf} profissional{quantidadeProf !== 1 ? "s" : ""}</Text>
                 </View>
               </TouchableOpacity>
             );
@@ -153,6 +261,34 @@ export default function TelaInicialCliente({ onLogout }: any) {
       <View>
         <Text style={styles.sectionTitle}>Serviços em andamento</Text>
       </View>
+
+      {carregandoAceitos ? (
+        <View style={styles.carregandoContainer}>
+          <ActivityIndicator size="small" color="#005362" />
+          <Text style={styles.carregandoTexto}>Carregando serviços aceitos...</Text>
+        </View>
+      ) : servicosAceitos.length > 0 ? (
+        <View style={styles.servicosAceitosList}>
+          {servicosAceitos.map((serv) => (
+            <TouchableOpacity
+              key={`${serv.id}-${serv.prestadorId}`}
+              style={styles.servicoAceitoCard}
+              onPress={() => abrirModal(serv)}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.servicoAceitoTitulo}>
+                {serv.estilo || serv.tipo || "Serviço"}
+              </Text>
+              <Text style={styles.servicoAceitoInfo}>
+                {serv.data || "Data não informada"} • {serv.local || "Local não informado"}
+              </Text>
+              <Text style={styles.servicoAceitoAcoes}>Toque para gerenciar</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      ) : (
+        <Text style={styles.nenhumResultado}>Nenhum serviço aceito no momento</Text>
+      )}
 
       {!carregando && (
         <TouchableOpacity
@@ -169,6 +305,56 @@ export default function TelaInicialCliente({ onLogout }: any) {
           <Text style={styles.sectionButtonArrow}>→</Text>
         </TouchableOpacity>
       )}
+
+      <Modal visible={modalVisivel} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Gerenciar Serviço</Text>
+
+            <Text style={styles.modalServicoTitulo}>
+              {servicoSelecionado?.estilo || servicoSelecionado?.tipo || "Serviço"}
+            </Text>
+
+            <Text style={styles.modalInfo}>
+              {servicoSelecionado?.data || "Data não informada"} • {servicoSelecionado?.local || "Local não informado"}
+            </Text>
+
+            <View style={styles.modalInputContainer}>
+              <Text style={styles.modalLabel}>Reportar problema (opcional)</Text>
+              <TextInput
+                style={styles.modalInput}
+                placeholder="Descreva o problema..."
+                placeholderTextColor="#999"
+                value={problemaTexto}
+                onChangeText={setProblemaTexto}
+                multiline
+              />
+            </View>
+
+            <View style={styles.modalButtonsRow}>
+              <TouchableOpacity
+                style={styles.modalProblemButton}
+                onPress={() => atualizarStatusServico("problema")}
+              >
+                <Text style={styles.modalProblemText}>Reportar Problema</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.modalButtonsRow}>
+              <TouchableOpacity
+                style={styles.modalFinishButton}
+                onPress={() => atualizarStatusServico("realizado")}
+              >
+                <Text style={styles.modalFinishText}>Finalizar Serviço</Text>
+              </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity style={styles.modalCloseButton} onPress={fecharModal}>
+              <Text style={styles.modalCloseText}>Fechar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
@@ -395,5 +581,136 @@ const styles = StyleSheet.create({
     color: "#005362",
     fontWeight: "600",
     marginLeft: 12,
+  },
+
+  servicosAceitosList: {
+    marginBottom: 8,
+  },
+
+  servicoAceitoCard: {
+    backgroundColor: "#f7fbff",
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 10,
+    borderLeftWidth: 4,
+    borderLeftColor: "#1e90ff",
+  },
+
+  servicoAceitoTitulo: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#333",
+    marginBottom: 4,
+  },
+
+  servicoAceitoInfo: {
+    fontSize: 13,
+    color: "#666",
+    marginBottom: 6,
+  },
+
+  servicoAceitoAcoes: {
+    fontSize: 12,
+    color: "#1e90ff",
+    fontWeight: "600",
+  },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 16,
+  },
+
+  modalContainer: {
+    width: "100%",
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 20,
+  },
+
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#333",
+    marginBottom: 8,
+  },
+
+  modalServicoTitulo: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#005362",
+    marginBottom: 4,
+  },
+
+  modalInfo: {
+    fontSize: 13,
+    color: "#666",
+    marginBottom: 14,
+  },
+
+  modalInputContainer: {
+    marginBottom: 12,
+  },
+
+  modalLabel: {
+    fontSize: 12,
+    color: "#666",
+    marginBottom: 6,
+  },
+
+  modalInput: {
+    backgroundColor: "#f5f5f5",
+    borderRadius: 10,
+    padding: 10,
+    minHeight: 70,
+    textAlignVertical: "top",
+    fontSize: 13,
+    color: "#333",
+  },
+
+  modalButtonsRow: {
+    marginTop: 6,
+  },
+
+  modalProblemButton: {
+    backgroundColor: "#FFC107",
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+
+  modalProblemText: {
+    color: "#333",
+    fontWeight: "700",
+    fontSize: 14,
+  },
+
+  modalFinishButton: {
+    backgroundColor: "#4CAF50",
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+
+  modalFinishText: {
+    color: "#fff",
+    fontWeight: "700",
+    fontSize: 14,
+  },
+
+  modalCloseButton: {
+    marginTop: 10,
+    paddingVertical: 10,
+    borderRadius: 10,
+    backgroundColor: "#eee",
+    alignItems: "center",
+  },
+
+  modalCloseText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#666",
   },
 });
