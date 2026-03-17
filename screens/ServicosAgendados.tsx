@@ -84,7 +84,6 @@ export default function ServicosAgendados() {
 
   return (
     <ScrollView style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <ArrowLeft size={24} color="#fff" />
@@ -105,7 +104,6 @@ export default function ServicosAgendados() {
         <View style={{ width: 24 }} />
       </View>
 
-      {/* Conteúdo */}
       {carregando ? (
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyText}>Carregando serviços...</Text>
@@ -126,7 +124,6 @@ export default function ServicosAgendados() {
             {servicosAgendados.length !== 1 ? "s" : ""}
           </Text>
 
-          {/* Mostrar somente serviços "a fazer" */}
           {servicosAgendados
             .filter((servico) => servico.status === "a fazer")
             .map((servicoStatus) => (

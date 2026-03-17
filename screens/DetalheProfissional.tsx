@@ -21,13 +21,11 @@ export default function DetalheProfissional() {
   const buscarDetalhes = async () => {
     setCarregando(true);
     try {
-      // Buscar dados do usuário
       const userDoc = await firestore.collection("Usuario").doc(profissional.id).get();
       if (userDoc.exists) {
         setUsuarioData(userDoc.data());
       }
 
-      // Buscar serviços do profissional
       const servicosSnapshot = await firestore
         .collection("Usuario")
         .doc(profissional.id)
@@ -59,11 +57,9 @@ export default function DetalheProfissional() {
   };
 
   const handleSolicitarServicoPrincipal = () => {
-    // Se houver serviços, solicita o primeiro
     if (servicos.length > 0) {
       handleSolicitarServico(servicos[0]);
     } else {
-      // Caso contrário, abre com a profissão do prestador
       navigation.navigate("SolicitarServico", {
         prestadorId: profissional.id,
         prestadorNome: profissional.nome,
@@ -83,7 +79,6 @@ export default function DetalheProfissional() {
 
   return (
     <ScrollView style={styles.container}>
-      {/* Header */}
       <View style={styles.headerDetalhe}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.botaoVoltar}>
           <ArrowLeft size={24} color="#fff" />
@@ -92,7 +87,6 @@ export default function DetalheProfissional() {
         <View style={{ width: 40 }} />
       </View>
 
-      {/* Card Principal */}
       <View style={styles.cardPrincipal}>
         <View style={styles.headerCard}>
           <View>
@@ -103,7 +97,6 @@ export default function DetalheProfissional() {
           </View>
         </View>
 
-        {/* Informações Principais */}
         <View style={styles.infoSection}>
           <View style={styles.infoItem}>
             <Star size={20} color="#FFD700" />
@@ -143,7 +136,6 @@ export default function DetalheProfissional() {
         </View>
       </View>
 
-      {/* Seção de Serviços */}
       <View style={styles.servicosSection}>
         <View style={styles.sectionHeader}>
           <Award size={20} color="#527954" />
@@ -174,7 +166,6 @@ export default function DetalheProfissional() {
         )}
       </View>
 
-      {/* Botão de Ação */}
       <View style={styles.acaoContainer}>
         <TouchableOpacity 
           style={styles.botaoContratar}

@@ -29,8 +29,7 @@ export default function PerfilTrabalhador() {
           const usuarioAutenticado = auth.currentUser;
 
           if (usuarioAutenticado) {
-            console.log('UID do usuário:', usuarioAutenticado.uid); // Debug
-            // 🔹 Buscar dados do usuário
+            console.log('UID do usuário:', usuarioAutenticado.uid); 
             const docSnap = await firestore
               .collection("Usuario")
               .doc(usuarioAutenticado.uid)
@@ -48,7 +47,6 @@ export default function PerfilTrabalhador() {
               }));
             }
 
-            // 🔹 Buscar histórico de serviços
             const snapshot = await firestore
               .collection("ServicosAdds")
               .doc(usuarioAutenticado.uid)
@@ -57,7 +55,7 @@ export default function PerfilTrabalhador() {
 
             const lista = snapshot.docs.map(doc => {
               const data = doc.data();
-              console.log('Documento:', doc.id, data); // Debug
+              console.log('Documento:', doc.id, data); 
               return {
                 id: doc.id,
                 servico: data.estilo,
@@ -67,8 +65,7 @@ export default function PerfilTrabalhador() {
                 imagem: data.imagem,
               };
             });
-
-            console.log('Lista de serviços:', lista); // Debug
+            console.log('Lista de serviços:', lista); 
             setHistorico(lista);
           }
         } catch (erro) {
@@ -106,9 +103,7 @@ export default function PerfilTrabalhador() {
               const usuarioAutenticado = auth.currentUser;
               if (!usuarioAutenticado) return;
 
-              // Deletar dados do Firestore
               await firestore.collection("Usuario").doc(usuarioAutenticado.uid).delete();
-              // Deletar serviços oferecidos
               const servicosSnapshot = await firestore
                 .collection("ServicosAdds")
                 .doc(usuarioAutenticado.uid)
@@ -116,8 +111,7 @@ export default function PerfilTrabalhador() {
                 .get();
               const deletePromises = servicosSnapshot.docs.map(doc => doc.ref.delete());
               await Promise.all(deletePromises);
-
-              // Deletar conta no Auth
+              
               await usuarioAutenticado.delete();
 
               Alert.alert("Conta deletada", "Sua conta foi deletada com sucesso.");
@@ -137,7 +131,6 @@ export default function PerfilTrabalhador() {
 
   return (
     <ScrollView style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <ArrowLeft size={24} color="#fff" />
@@ -155,7 +148,6 @@ export default function PerfilTrabalhador() {
         </TouchableOpacity>
       </View>
 
-      {/* Perfil */}
       <View style={styles.perfilSection}>
         <View style={styles.avatarContainer}>
           <View style={styles.avatar} />
@@ -164,7 +156,6 @@ export default function PerfilTrabalhador() {
         <Text style={styles.email}>{usuario.email}</Text>
       </View>
 
-      {/* Avaliação */}
       <View style={styles.avaliacaoCard}>
         <View style={styles.avaliacaoContent}>
           <Star size={20} color="#FFD700" fill="#FFD700" />
@@ -173,7 +164,6 @@ export default function PerfilTrabalhador() {
         </View>
       </View>
 
-      {/* Informações */}
       <View style={styles.contatoSection}>
         <Text style={styles.sectionTitle}>Informações de Contato</Text>
 
@@ -202,7 +192,6 @@ export default function PerfilTrabalhador() {
         </View>
       </View>
 
-      {/* Serviços oferecidos */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Serviços Oferecidos</Text>
         {usuario.profissao ? (
@@ -217,7 +206,6 @@ export default function PerfilTrabalhador() {
         )}
       </View>
 
-      {/* Histórico */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Serviços Adicionados</Text>
 
@@ -255,13 +243,11 @@ export default function PerfilTrabalhador() {
         )}
       </View>
 
-      {/* Logout */}
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <LogOut size={20} color="#1e90ff" />
         <Text style={styles.logoutText}>Sair da conta</Text>
       </TouchableOpacity>
 
-      {/* Deletar Conta */}
       <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteAccount}>
         <Text style={styles.deleteButtonText}>Deletar Conta</Text>
       </TouchableOpacity>

@@ -13,7 +13,6 @@ export default function TelaInicialCliente({ onLogout }: any) {
   const [servicosPopulares, setServicosPopulares] = useState([]);
   const [carregando, setCarregando] = useState(true);
 
-  // Buscar profissionais do Firebase
   useFocusEffect(
     useCallback(() => {
       buscarDadosFirebase();
@@ -29,14 +28,12 @@ export default function TelaInicialCliente({ onLogout }: any) {
 
       for (const userDoc of users.docs) {
         const userData = userDoc.data();
-        
-        // Coletar profissões dos prestadores e contar
+
         if (userData.tipo === "prestador" && userData.profissao) {
           const count = (servicosUnicos.get(userData.profissao) || 0) + 1;
           servicosUnicos.set(userData.profissao, count);
         }
-        
-        // Verificar se o usuário é trabalhador (tem serviços)
+
         const servicos = await userDoc.ref.collection("Serv").get();
         
         if (servicos.docs.length > 0) {
@@ -71,29 +68,24 @@ export default function TelaInicialCliente({ onLogout }: any) {
     }
   };
 
-  // Filtrar serviços baseado na pesquisa
   const servicosFiltrados = servicosPopulares.filter((serv) =>
     serv.nome.toLowerCase().includes(searchText.toLowerCase())
   );
 
-  // Filtrar profissionais baseado na pesquisa
   const profissionaisFiltrados = profissionaisRecomendados.filter((pro) =>
     pro.nome.toLowerCase().includes(searchText.toLowerCase())
   );
 
-  // Função para contar profissionais por tipo de serviço
   const contarProfissionaisPorServico = (nomeServico: any) => {
     return servicosPopulares.find(s => s.nome === nomeServico)?.quantidade || 0;
   };
 
-  // Função para navegar aos profissionais do serviço selecionado
   const handleServicoPress = (serv: any) => {
     navigation.navigate("PrestadoresPorServico", { 
       servico: serv.nome,
     });
   };
 
-  // Função para navegar aos detalhes do profissional
   const handleProfissionalPress = (profissional: any) => {
     navigation.navigate("DetalheProfissional", { 
       profissional: profissional,
@@ -110,16 +102,16 @@ export default function TelaInicialCliente({ onLogout }: any) {
             <User size={24} />
           </TouchableOpacity>
 
-          //se basear na tela de ServicosAgendados para essa
-<TouchableOpacity style={styles.iconButton} 
-            onPress={() => navigation.navigate("ServicosEmAndamento")}>
+          <TouchableOpacity
+            style={styles.iconButton}
+            onPress={() => navigation.navigate("ServicosEmAndamento")}
+          >
             <Clock size={24} />
-            </TouchableOpacity>
+          </TouchableOpacity>
 
         </View>
       </View>
 
-      {/* Barra de busca */}
       <View style={styles.searchBox}>
         <Search size={20} color="#666" />
         <TextInput
@@ -158,32 +150,9 @@ export default function TelaInicialCliente({ onLogout }: any) {
         <Text style={styles.nenhumResultado}>Nenhum serviço encontrado</Text>
       )}
 
-      {/* Usuários Recentes */}
-      {!carregando && profissionaisFiltrados.length > 0 && (
-        <>
-          <Text style={styles.sectionTitle}>Profissionais Recomendados</Text>
-          {profissionaisFiltrados.slice(0, 5).map((prof) => (
-            <TouchableOpacity
-              key={prof.id}
-              style={styles.recomendadoCard}
-              activeOpacity={0.7}
-              onPress={() => handleProfissionalPress(prof)}
-            >
-              <View style={styles.avatarRecomendado}>
-                <Text style={styles.avatarText}>
-                  {prof.nome.charAt(0).toUpperCase()}
-                </Text>
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.nomeProf}>{prof.nome}</Text>
-                <View style={styles.profissaoBadge}>
-                  <Text style={styles.profissaoTexto}>{prof.profissao}</Text>
-                </View>
-              </View>
-            </TouchableOpacity>
-          ))}
-        </>
-      )}
+      <View>
+        <Text style={styles.sectionTitle}>Serviços em andamento</Text>
+      </View>
 
       {!carregando && (
         <TouchableOpacity

@@ -32,7 +32,6 @@ export default function SolicitarServico() {
         return;
       }
 
-      // Salvar em ServicosAgendados > prestadorId > Serv
       const novoServico = {
         id: Math.random().toString(),
         estilo: servico,
@@ -40,7 +39,7 @@ export default function SolicitarServico() {
         data: data,
         local: local,
         descricao: descricao,
-        status: 'não realizado',
+        status: 'a fazer',
         clienteId: usuarioLogado,
         dataSolicitacao: new Date(),
         criadoEm: new Date(),
@@ -88,7 +87,6 @@ export default function SolicitarServico() {
         <View style={{ width: 24 }} />
       </View>
 
-      {/* Card do Prestador */}
       <View style={estilos.cardPrestador}>
         <View style={estilos.avatarPrestador}>
           <Text style={estilos.avatarTexto}>
@@ -101,9 +99,8 @@ export default function SolicitarServico() {
         </View>
       </View>
 
-      {/* Formulário */}
       <View style={estilos.formulario}>
-        {/* Campo Data */}
+
         <View style={estilos.campoGrupo}>
           <Text style={estilos.label}>
             <Calendar size={16} color="#005362" /> Data do Serviço *
@@ -121,7 +118,6 @@ export default function SolicitarServico() {
           </Text>
         </View>
 
-        {/* Campo Local */}
         <View style={estilos.campoGrupo}>
           <Text style={estilos.label}>
             <MapPin size={16} color="#005362" /> Local do Serviço *
@@ -136,7 +132,6 @@ export default function SolicitarServico() {
           />
         </View>
 
-        {/* Campo Descrição */}
         <View style={estilos.campoGrupo}>
           <Text style={estilos.label}>
             <FileText size={16} color="#005362" /> Descrição (opcional)
@@ -153,7 +148,6 @@ export default function SolicitarServico() {
           />
         </View>
 
-        {/* Botões */}
         <View style={estilos.botoes}>
           <TouchableOpacity
             style={[estilos.botao, estilos.botaoCancelar]}
@@ -320,4 +314,3 @@ const estilos = StyleSheet.create({
     opacity: 0.6,
   },
 });
-

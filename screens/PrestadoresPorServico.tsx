@@ -30,7 +30,6 @@ export default function PrestadoresPorServico() {
       for (const userDoc of users.docs) {
         const userData = userDoc.data();
         
-        // Filtrar apenas prestadores do serviço selecionado
         if (userData.tipo === "prestador" && userData.profissao === servico) {
           prestadores.push({
             id: userDoc.id,
@@ -44,8 +43,7 @@ export default function PrestadoresPorServico() {
           });
         }
       }
-
-      // Ordenar por data de criação (mais recentes primeiro)
+      
       prestadores.sort((a, b) => {
         const dateA = a.criadoEm?.toDate?.() || new Date(0);
         const dateB = b.criadoEm?.toDate?.() || new Date(0);

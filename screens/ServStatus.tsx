@@ -32,38 +32,29 @@ export default function ServStatus() {
 
         setLoading(true);
 
-        // Limpar subscriber anterior
         if (unsubscribeRef.current) {
             unsubscribeRef.current();
         }
 
-        // Buscar serviços solicitados pelo usuário atual (cliente)
         unsubscribeRef.current = firestore
-            .collection("ServicosAgendados")
+            .collectionGroup("ServicoStatus")
+            .where("clienteId", "==", usuarioId)
             .onSnapshot((snapshot) => {
-                const todosServs: Serv[] = [];
-
-                snapshot.forEach((docPrestador) => {
-                    // Para cada prestador, buscar seus serviços com listener
-                    docPrestador.ref.collection("Serv").onSnapshot((servSnapshot) => {
-                        const servsDoPrestador = servSnapshot.docs
-                            .map((doc) => {
-                                const data = doc.data();
-                                return {
-                                    ...data,
-                                    id: doc.id,
-                                    prestadorId: docPrestador.id,
-                                    status: data.status || 'não realizado',
-                                } as Serv;
-                            })
-                            .filter((serv) => serv.clienteId === usuarioId); // Apenas serviços do cliente
-
-                        // Remover serviços antigos deste prestador e adicionar novos
-                        const outrosServs = todosServs.filter(s => s.prestadorId !== docPrestador.id);
-                        setServs([...outrosServs, ...servsDoPrestador]);
-                        setLoading(false);
-                    });
+                const servsDoCliente: Serv[] = snapshot.docs.map((doc) => {
+                    const data = doc.data();
+                    const prestadorId = doc.ref.parent.parent?.id;
+                    return {
+                        ...data,
+                        id: doc.id,
+                        prestadorId,
+                        status: data.status || 'a fazer',
+                    } as Serv;
                 });
+                setServs(servsDoCliente);
+                setLoading(false);
+            }, (error) => {
+                console.error("Erro ao buscar serviços:", error);
+                setLoading(false);
             });
     };
 
@@ -77,7 +68,7 @@ export default function ServStatus() {
             await firestore
                 .collection("ServicosAgendados")
                 .doc(item.prestadorId)
-                .collection("Serv")
+                .collection("ServicoStatus")
                 .doc(item.id)
                 .update({
                     status: novoStatus,
@@ -108,7 +99,7 @@ export default function ServStatus() {
                             await firestore
                                 .collection("ServicosAgendados")
                                 .doc(item.prestadorId)
-                                .collection("Serv")
+                                .collection("ServicoStatus")
                                 .doc(item.id)
                                 .delete();
 
@@ -124,13 +115,13 @@ export default function ServStatus() {
 
     const getStatusColor = (status: string) => {
         if (status === 'realizado') return '#4CAF50';
-        if (status === 'não realizado') return '#FF6B6B';
+        if (status === 'a fazer') return '#FF6B6B';
         return '#FFC107';
     };
 
     const getStatusText = (status: string) => {
         if (status === 'realizado') return '✓ Realizado';
-        if (status === 'não realizado') return '✗ Não Realizado';
+        if (status === 'a fazer') return '⌛ A Fazer';
         return status;
     };
 
@@ -161,7 +152,7 @@ export default function ServStatus() {
                 marginBottom: 15,
                 paddingHorizontal: 5,
             }}>
-                {['todos', 'realizado', 'não realizado'].map((f) => (
+                {['todos', 'realizado', 'a fazer'].map((f) => (
                     <TouchableOpacity
                         key={f}
                         style={[
@@ -179,7 +170,7 @@ export default function ServStatus() {
                             fontWeight: '600',
                             fontSize: 12,
                         }}>
-                            {f === 'todos' ? 'Todos' : f === 'realizado' ? '✓ Realizados' : '✗ Não Realizados'}
+                            {f === 'todos' ? 'Todos' : f === 'realizado' ? '✓ Realizados' : '⌛ A Fazer'}
                         </Text>
                     </TouchableOpacity>
                 ))}
@@ -258,7 +249,7 @@ export default function ServStatus() {
                                     </TouchableOpacity>
                                 )}
 
-                                {item.status !== 'não realizado' && (
+                                {item.status !== 'a fazer' && (
                                     <TouchableOpacity
                                         style={[
                                             styles.listItem,
@@ -269,10 +260,10 @@ export default function ServStatus() {
                                                 alignItems: 'center'
                                             }
                                         ]}
-                                        onPress={() => atualizarStatus(item, 'não realizado')}
+                                        onPress={() => atualizarStatus(item, 'a fazer')}
                                     >
                                         <Text style={[styles.text, { color: '#fff', fontWeight: 'bold' }]}>
-                                            ✗ Não Realizado
+                                            ⌛ A Fazer
                                         </Text>
                                     </TouchableOpacity>
                                 )}
@@ -302,4 +293,3 @@ export default function ServStatus() {
         </ImageBackground>
     );
 }
-

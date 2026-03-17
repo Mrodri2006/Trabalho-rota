@@ -27,7 +27,6 @@ export default function NovosPrestadores() {
       for (const userDoc of users.docs) {
         const userData = userDoc.data();
         
-        // Filtrar apenas prestadores
         if (userData.tipo === "prestador") {
           prestadores.push({
             id: userDoc.id,
@@ -42,7 +41,6 @@ export default function NovosPrestadores() {
         }
       }
 
-      // Ordenar por data de criação (mais recentes primeiro)
       prestadores.sort((a, b) => {
         const dateA = a.criadoEm?.toDate?.() || new Date(0);
         const dateB = b.criadoEm?.toDate?.() || new Date(0);

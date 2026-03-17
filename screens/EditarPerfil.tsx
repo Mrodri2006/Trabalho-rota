@@ -107,7 +107,6 @@ export default function EditarPerfil() {
 
   return (
     <ScrollView style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <ArrowLeft size={24} color="#000" />
@@ -126,9 +125,7 @@ export default function EditarPerfil() {
         </TouchableOpacity>
       </View>
 
-      {/* Campos de Edição */}
       <View style={styles.formContainer}>
-        {/* Nome */}
         <View style={styles.fieldGroup}>
           <Text style={styles.label}>Nome Completo</Text>
           <TextInput
@@ -144,7 +141,6 @@ export default function EditarPerfil() {
           {errors.nome && <Text style={styles.errorText}>{errors.nome}</Text>}
         </View>
 
-        {/* Email (somente leitura) */}
         <View style={styles.fieldGroup}>
           <Text style={styles.label}>E-mail</Text>
           <TextInput
@@ -156,7 +152,6 @@ export default function EditarPerfil() {
           <Text style={styles.helperText}>E-mail não pode ser alterado</Text>
         </View>
 
-        {/* Telefone */}
         <View style={styles.fieldGroup}>
           <Text style={styles.label}>Telefone</Text>
           <TextInput
@@ -173,7 +168,6 @@ export default function EditarPerfil() {
           {errors.fone && <Text style={styles.errorText}>{errors.fone}</Text>}
         </View>
 
-        {/* Profissão */}
         <View style={styles.fieldGroup}>
           <Text style={styles.label}>Profissão</Text>
           <TextInput
@@ -185,7 +179,6 @@ export default function EditarPerfil() {
           />
         </View>
 
-        {/* Distância */}
         <View style={styles.fieldGroup}>
           <Text style={styles.label}>Distância (km)</Text>
           <TextInput
@@ -197,7 +190,6 @@ export default function EditarPerfil() {
           />
         </View>
 
-        {/* Botão Salvar */}
         <TouchableOpacity
           style={[styles.botaoSalvarCompleto, salvando && styles.botaoDesabilitado]}
           onPress={salvarDados}
@@ -216,7 +208,6 @@ export default function EditarPerfil() {
           )}
         </TouchableOpacity>
 
-        {/* Botão Cancelar */}
         <TouchableOpacity
           style={styles.botaoCancelar}
           onPress={() => navigation.goBack()}

@@ -31,6 +31,7 @@ export default function ServicosEmAndamento() {
         .collection("ServicosAgendados")
         .doc(usuarioId)
         .collection("ServicoStatus")
+        .where("status", "==", "a fazer") // busca só os serviços em andamento
         .get();
 
       const lista = docSnap.docs.map((doc) => ({
@@ -46,13 +47,9 @@ export default function ServicosEmAndamento() {
     }
   };
 
-  const servicosEmAndamento = servicos.filter(
-    (servico) => servico.status === "a fazer"
-  );
-
   return (
     <ScrollView style={styles.container}>
-      {/* Header */}
+
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <ArrowLeft size={24} color="#fff" />
@@ -78,7 +75,7 @@ export default function ServicosEmAndamento() {
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyText}>Carregando serviços...</Text>
         </View>
-      ) : servicosEmAndamento.length === 0 ? (
+      ) : servicos.length === 0 ? (
         <View style={styles.emptyContainer}>
           <CheckCircle size={64} color="#1e90ff" />
           <Text style={styles.emptyTitle}>Nenhum serviço em andamento</Text>
@@ -89,11 +86,11 @@ export default function ServicosEmAndamento() {
       ) : (
         <View style={styles.content}>
           <Text style={styles.sectionTitle}>
-            Você tem {servicosEmAndamento.length} serviço
-            {servicosEmAndamento.length !== 1 ? "s" : ""} em andamento
+            Você tem {servicos.length} serviço
+            {servicos.length !== 1 ? "s" : ""} em andamento
           </Text>
 
-          {servicosEmAndamento.map((servico) => (
+          {servicos.map((servico) => (
             <View key={servico.firestoreId} style={styles.card}>
               <View style={styles.cardHeader}>
                 <Text style={styles.cardTitle}>
@@ -102,7 +99,9 @@ export default function ServicosEmAndamento() {
 
                 <View style={styles.statusBadge}>
                   <CheckCircle size={16} color="#fff" />
-                  <Text style={styles.statusText}>Em andamento</Text>
+                  <Text style={styles.statusText}>
+                    {servico.status}
+                  </Text>
                 </View>
               </View>
 
@@ -110,6 +109,12 @@ export default function ServicosEmAndamento() {
                 <Clock size={18} color="#1e90ff" />
                 <Text style={styles.infoText}>
                   {servico.horario || "Horário não informado"}
+                </Text>
+              </View>
+
+              <View style={{ marginTop: 8 }}>
+                <Text style={styles.infoText}>
+                  Status: {servico.status}
                 </Text>
               </View>
 

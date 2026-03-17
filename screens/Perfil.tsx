@@ -28,15 +28,12 @@ export default function Perfil() {
       { id: 3, servico: "Instalação Luminária", data: "10/11/2024", status: "Concluído", valor: "R$ 120" },
     ],
   });
-
-  // Carregar dados do usuário do Firebase ao focar na tela
   useFocusEffect(
     useCallback(() => {
       const carregarDadosUsuario = async () => {
         try {
           const usuarioAutenticado = auth.currentUser;
           if (usuarioAutenticado) {
-            // Buscar dados do Firestore na coleção "Usuario"
             const docSnap = await firestore.collection("Usuario").doc(usuarioAutenticado.uid).get();
             
             if (docSnap.exists) {
@@ -48,7 +45,6 @@ export default function Perfil() {
                 telefone: dados.fone || "",
               }));
             } else {
-              // Se não existir documento no Firestore, usa dados do Firebase Auth
               setUsuario(prevState => ({
                 ...prevState,
                 nome: usuarioAutenticado.displayName || "Usuário",
@@ -77,15 +73,12 @@ export default function Perfil() {
             try {
               const usuarioId = auth.currentUser?.uid;
               
-              // Deletar dados do Firestore
               if (usuarioId) {
                 await firestore.collection("Usuario").doc(usuarioId).delete();
               }
 
-              // Deletar conta do Firebase Auth
               await auth.currentUser?.delete();
 
-              // Navegar para login
               navigation.reset({
                 index: 0,
                 routes: [{ name: "Login" }],

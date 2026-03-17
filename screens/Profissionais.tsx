@@ -14,7 +14,6 @@ export default function TelaProfissionais() {
   const [profissionais, setProfissionais] = useState([]);
   const [carregando, setCarregando] = useState(true);
 
-  // Buscar profissionais do Firebase baseado no tipo de serviço
   useFocusEffect(
     useCallback(() => {
       buscarProfissionais();
@@ -29,10 +28,9 @@ export default function TelaProfissionais() {
 
       querySnapshot.forEach((doc) => {
         const servicoDados = doc.data();
-        
-        // Filtrar por tipo de serviço
+
         if (servicoDados.tipo && servicoDados.tipo.toLowerCase() === servico.toLowerCase()) {
-          // Obter dados do usuário/trabalhador
+  
           const userRef = doc.ref.parent.parent;
           
           userRef.get().then((userDoc) => {
@@ -46,8 +44,7 @@ export default function TelaProfissionais() {
                 distancia: userData.distancia || "A calcular",
                 tipo: servicoDados.tipo,
               };
-              
-              // Evitar duplicatas
+
               if (!profissionaisEncontrados.find(p => p.id === profissional.id)) {
                 profissionaisEncontrados.push(profissional);
               }
@@ -56,7 +53,6 @@ export default function TelaProfissionais() {
         }
       });
 
-      // Aguardar um pouco para garantir que todos os dados foram carregados
       setTimeout(() => {
         setProfissionais(profissionaisEncontrados);
         setCarregando(false);
@@ -67,19 +63,16 @@ export default function TelaProfissionais() {
     }
   };
 
-  // Filtrar profissionais baseado na pesquisa
   const profissionaisFiltrados = profissionais.filter((pro) =>
     pro.nome.toLowerCase().includes(searchText.toLowerCase())
   );
 
   const handleChamar = (profissional) => {
     alert(`Você solicitou ${profissional.nome} para ${servico}`);
-    // Aqui você pode adicionar lógica para fazer uma solicitação real
   };
 
   return (
     <ScrollView style={styles.container}>
-      {/* Header com botão voltar */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <ArrowLeft size={24} color="#000" />
@@ -88,7 +81,6 @@ export default function TelaProfissionais() {
         <View style={{ width: 40 }} />
       </View>
 
-      {/* Barra de busca */}
       <View style={styles.searchBox}>
         <Search size={20} color="#666" />
         <TextInput
@@ -105,12 +97,10 @@ export default function TelaProfissionais() {
         )}
       </View>
 
-      {/* Resultados */}
       <Text style={styles.resultadoText}>
         {profissionaisFiltrados.length} profissional(is) encontrado(s)
       </Text>
 
-      {/* Indicador de carregamento */}
       {carregando ? (
         <View style={styles.carregandoContainer}>
           <ActivityIndicator size="large" color="#000" />
