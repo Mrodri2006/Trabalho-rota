@@ -93,7 +93,6 @@ export default function NovosPrestadores() {
                   {prestador.nome.charAt(0).toUpperCase()}
                 </Text>
               </View>
-
               <View style={styles.infoContainer}>
                 <View style={styles.topRow}>
                   <View style={{ flex: 1 }}>
@@ -102,7 +101,7 @@ export default function NovosPrestadores() {
                       <Text style={styles.profissaoTexto}>{prestador.profissao}</Text>
                     </View>
                   </View>
-                  <View style={styles.badgeNovo}>
+                  <View>
                     <Text style={styles.badgeNovoTexto}>NOVO</Text>
                   </View>
                 </View>
@@ -125,7 +124,7 @@ export default function NovosPrestadores() {
               </View>
 
               <TouchableOpacity style={styles.botaoChamar} activeOpacity={0.8}>
-                <Text style={styles.botaoTxt}>Chamar</Text>
+                <Text style={styles.botaoTxt}>Informações</Text>
               </TouchableOpacity>
             </TouchableOpacity>
           ))}
@@ -239,10 +238,11 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   badgeNovoTexto: {
-    color: "#fff",
+    color: "green",
     fontSize: 10,
     fontWeight: "700",
     letterSpacing: 0.5,
+    margin: 1,
   },
   detalhesRow: {
     flexDirection: "row",

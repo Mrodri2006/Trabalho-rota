@@ -108,7 +108,6 @@ export default function Perfil() {
           <Edit2 size={20} color="#fff" />
         </TouchableOpacity>
       </View>
-
       
       <View style={styles.perfilSection}>
         <View style={styles.avatarContainer}>
