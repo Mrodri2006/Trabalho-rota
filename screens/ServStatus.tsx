@@ -1,9 +1,8 @@
 
 import { useState, useRef, useCallback } from 'react';
-import { FlatList, Text, ImageBackground, View, ActivityIndicator } from 'react-native';
+import { FlatList, Text, ImageBackground, View, ActivityIndicator, StyleSheet } from 'react-native';
 import { auth, firestore } from '../firebase';
 import { useFocusEffect } from '@react-navigation/native';
-import styles from '../estilo';
 import { Serv } from '../model/Serv';
 
 export default function ServStatus() {
@@ -80,62 +79,47 @@ export default function ServStatus() {
 
     return (
         <ImageBackground resizeMode='stretch' style={styles.container}>
-            <Text style={[
-                styles.text,
-                {
-                    fontSize: 20,
-                    fontWeight: 'bold',
-                    marginBottom: 15,
-                    marginTop: 10
-                }
-            ]}>
-                Histórico de Serviços
-            </Text>
+            <Text style={styles.title}>Histórico de Serviços</Text>
 
             {loading ? (
-                <View style={{ justifyContent: 'center', alignItems: 'center', paddingVertical: 40 }}>
+                <View style={styles.loadingContainer}>
                     <ActivityIndicator size="large" color="#005362" />
-                    <Text style={styles.text}>Carregando serviços...</Text>
+                    <Text style={styles.loadingText}>Carregando serviços...</Text>
                 </View>
             ) : servsFinalizados.length === 0 ? (
-                <Text style={styles.text}>Nenhum serviço finalizado</Text>
+                <View style={styles.emptyContainer}>
+                    <Text style={styles.emptyText}>Nenhum serviço finalizado</Text>
+                </View>
             ) : (
                 <FlatList
                     data={servsFinalizados}
                     keyExtractor={(item) => `${item.id}`}
                     renderItem={({ item }) => (
-                        <View style={[styles.listItem, { paddingVertical: 10, paddingHorizontal: 15, marginBottom: 12 }]}>
-                            <Text style={[styles.text, { fontWeight: 'bold', fontSize: 16 }]}>
+                        <View style={styles.card}>
+                            <Text style={styles.cardTitle}>
                                 {item.estilo || item.tipo}
                             </Text>
-                            <Text style={styles.text}>
+                            <Text style={styles.infoText}>
                                 📍 Local: {item.local}
                             </Text>
-                            <Text style={styles.text}>
+                            <Text style={styles.infoText}>
                                 📅 Data: {item.data}
                             </Text>
-                            <Text style={styles.text}>
+                            <Text style={styles.infoText}>
                                 Tipo: {item.tipo}
                             </Text>
 
-                            {/* Status Visual */}
-                            <View style={{ marginVertical: 10 }}>
+                            <View style={styles.statusContainer}>
                                 <Text style={[
-                                    styles.text,
+                                    styles.statusText,
                                     {
                                         color: getStatusColor(item.status),
-                                        fontWeight: 'bold',
-                                        fontSize: 16,
                                         backgroundColor: getStatusColor(item.status) + '20',
-                                        padding: 8,
-                                        borderRadius: 5,
-                                        textAlign: 'center'
                                     }
                                 ]}>
                                     {getStatusText(item.status)}
                                 </Text>
                             </View>
-
                         </View>
                     )}
                     scrollEnabled={true}
@@ -144,3 +128,67 @@ export default function ServStatus() {
         </ImageBackground>
     );
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: "#fff",
+        padding: 16,
+    },
+    title: {
+        fontSize: 18,
+        fontWeight: "700",
+        color: "#333",
+        marginBottom: 12,
+        marginTop: 10,
+    },
+    loadingContainer: {
+        justifyContent: "center",
+        alignItems: "center",
+        paddingVertical: 40,
+    },
+    loadingText: {
+        fontSize: 14,
+        color: "#666",
+        marginTop: 12,
+    },
+    emptyContainer: {
+        alignItems: "center",
+        paddingVertical: 40,
+    },
+    emptyText: {
+        fontSize: 16,
+        color: "#999",
+        fontWeight: "600",
+    },
+    card: {
+        backgroundColor: "#f9f9f9",
+        borderRadius: 12,
+        paddingVertical: 10,
+        paddingHorizontal: 15,
+        marginBottom: 12,
+        borderLeftWidth: 4,
+        borderLeftColor: "#005362",
+    },
+    cardTitle: {
+        fontSize: 16,
+        fontWeight: "700",
+        color: "#333",
+        marginBottom: 6,
+    },
+    infoText: {
+        fontSize: 14,
+        color: "#666",
+        marginTop: 4,
+    },
+    statusContainer: {
+        marginTop: 10,
+    },
+    statusText: {
+        fontWeight: "700",
+        fontSize: 16,
+        padding: 8,
+        borderRadius: 5,
+        textAlign: "center",
+    },
+});
