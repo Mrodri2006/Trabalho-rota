@@ -41,7 +41,7 @@ export default function TelaInicialCliente({ onLogout }: any) {
 
       for (const userDoc of users.docs) {
         const userData = userDoc.data();
-
+// faz a contagem dos serviços oferecidos por cada profissão
         if (userData.tipo === "prestador" && userData.profissao) {
           const count = (servicosUnicos.get(userData.profissao) || 0) + 1;
           servicosUnicos.set(userData.profissao, count);
@@ -117,7 +117,7 @@ export default function TelaInicialCliente({ onLogout }: any) {
     if (unsubscribeAceitosRef.current) {
       unsubscribeAceitosRef.current();
     }
-
+// Busca os serviços aceitos para o cliente e mantém a atualização em tempo real
     unsubscribeAceitosRef.current = firestore
       .collection("ServicosClientes")
       .doc(usuarioId)
@@ -162,6 +162,7 @@ export default function TelaInicialCliente({ onLogout }: any) {
     }
 
     try {
+      // Atualiza o status no documento do trabalhador
       await firestore
         .collection("ServicosAgendados")
         .doc(servicoSelecionado.prestadorId)
@@ -177,7 +178,7 @@ export default function TelaInicialCliente({ onLogout }: any) {
             ? { dataFinalizado: new Date() }
             : {}),
         });
-
+// Atualiza o status no documento do cliente
       await firestore
         .collection("ServicosClientes")
         .doc(servicoSelecionado.clienteId)

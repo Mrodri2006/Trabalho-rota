@@ -97,17 +97,20 @@ export default function HomeTrabalhador() {
           status: "a fazer",
           dataAceito: new Date(),
         });
-
+// Atualiza o status ao cliente e ao trabalhador também
       if (servico.clienteId) {
         await firestore
           .collection("ServicosClientes")
           .doc(servico.clienteId)
           .collection("ServicoStatus")
           .doc(servico.id)
-          .update({
-            status: "a fazer",
-            dataAceito: new Date(),
-          });
+          .set(
+            {
+              status: "a fazer",
+              dataAceito: new Date(),
+            },
+            { merge: true }
+          );
       }
 
       setServicoAceito(servico);
@@ -146,12 +149,18 @@ export default function HomeTrabalhador() {
           .doc(servico.clienteId)
           .collection("ServicoStatus")
           .doc(servico.id)
-          .update({
-            status: "rejeitado",
-            dataRejeicao: new Date(),
-          });
+          .set(
+            {
+              status: "rejeitado",
+              dataRejeicao: new Date(),
+            },
+            { merge: true }
+          );
       }
 
+      setServicosSolicitados((prev) =>
+        prev.filter((s) => s.id !== servico.id)
+      );
       setServicoRejeitado(servico);
       setServicoAceito(null);
       setAlertVisivel(true);
