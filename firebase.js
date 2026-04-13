@@ -5,13 +5,13 @@ import "firebase/compat/storage";
 
 // COLAR AQUI A STRING DE CONEXÃO
 const firebaseConfig = {
- apiKey: "AIzaSyDY47c79ede5r80wMLaDaNmYCDMpkPo6mU",
-authDomain: "info-650fe.firebaseapp.com",
-projectId: "info-650fe",
-storageBucket: "info-650fe.firebasestorage.app",
-messagingSenderId: "690975448573",
-appId: "1:690975448573:web:bdceeb4f33bfdabcf80d94",
-measurementId: "G-LEYT04758D"
+  apiKey: "AIzaSyDwYKAPsHVqoNGhF2yErcK7Luw-bGfueso",
+  authDomain: "app-monitoramento-56f27.firebaseapp.com",
+  projectId: "app-monitoramento-56f27",
+  storageBucket: "app-monitoramento-56f27.firebasestorage.app",
+  messagingSenderId: "847472211063",
+  appId: "1:847472211063:web:6caa421ff0e104c0b10272",
+  measurementId: "G-RNSP0MDF9J"
 };
   
   

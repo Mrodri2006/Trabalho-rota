@@ -1,63 +1,24 @@
-
-import { StyleSheet, Text, View } from 'react-native';
-
-import Login    from './screens/Login';
-import Register from './screens/Register';
-import Register2 from './screens/Register2';
-import Menu     from './screens/Menu';
-import LoginTrabalhador     from './screens/LoginTrabalhador';
-import HomeTrabalhador     from './screens/HomeTrabalhador';
-import ServicosAgendados from './screens/ServicosAgendados';
-import Perfil    from './screens/Perfil';
-import PerfilTrabalhador from './screens/PerfilTrabalhador';
-import EditarPerfil from './screens/EditarPerfil';
-import Profissionais    from './screens/Profissionais';
-import DetalheProfissional from './screens/DetalheProfissional';
-import NovosPrestadores from './screens/NovosPrestadores';
-import PrestadoresPorServico from './screens/PrestadoresPorServico';
-import SolicitarServico from './screens/SolicitarServico';
-import AddServico from './screens/AddServico';
-import ServStatus from './screens/ServStatus';
-
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import ServicosEmAndamento from './screens/ServicosEmAndamento';
+
+import DriverLogin from './screens/DriverLogin';
+import DriverRegister from './screens/DriverRegister';
+import DriverHome from './screens/DriverHome';
+import DriverDashboard from './screens/DriverDashboard';
+import DriverReports from './screens/DriverReports';
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator>
-        <Stack.Screen name='Login'    component={Login} options={{ headerShown: false }} /> 
-        <Stack.Screen name='Register' component={Register} options={{ headerShown: false }} />
-         <Stack.Screen name='Register2' component={Register2} options={{ headerShown: false }}/>
-        <Stack.Screen name='Menu'     component={Menu} options={{ headerShown: false }}/>
-        <Stack.Screen name="LoginTrabalhador" component={LoginTrabalhador} options={{ headerShown: false }}/>
-        <Stack.Screen name="HomeTrabalhador" component={HomeTrabalhador} options={{ headerShown: false }}  />
-        <Stack.Screen name="ServicosAgendados" component={ServicosAgendados} options={{ headerShown: false }}/>
-        <Stack.Screen name='PerfilTrabalhador' component={PerfilTrabalhador} options={{ headerShown: false }}/>
-        <Stack.Screen name='Perfil'    component={Perfil} options={{ headerShown: false }}/>
-        <Stack.Screen name='EditarPerfil' component={EditarPerfil} options={{ headerShown: false }}/>
-        <Stack.Screen name='Profissionais'    component={Profissionais} options={{ headerShown: false }}/>
-        <Stack.Screen name='DetalheProfissional' component={DetalheProfissional} options={{ headerShown: false }}/>
-        <Stack.Screen name='NovosPrestadores' component={NovosPrestadores} options={{ headerShown: false }}/>
-        <Stack.Screen name='PrestadoresPorServico' component={PrestadoresPorServico} options={{ headerShown: false }}/>
-        <Stack.Screen name='SolicitarServico' component={SolicitarServico} options={{ headerShown: false }}/>
-        <Stack.Screen name='AddServico' component={AddServico} options={{ headerShown: false }}/>
-        <Stack.Screen name='ServStatus' component={ServStatus} options={{ headerShown: false }}/>
-        <Stack.Screen name='ServicosEmAndamento'    component={ServicosEmAndamento} options={{ headerShown: false }} /> 
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name='DriverLogin' component={DriverLogin} />
+        <Stack.Screen name='DriverRegister' component={DriverRegister} />
+        <Stack.Screen name='DriverHome' component={DriverHome} />
+        <Stack.Screen name='DriverDashboard' component={DriverDashboard} />
+        <Stack.Screen name='DriverReports' component={DriverReports} />
       </Stack.Navigator>
     </NavigationContainer>
-    
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
