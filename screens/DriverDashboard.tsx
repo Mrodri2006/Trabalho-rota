@@ -1,14 +1,17 @@
 import { useMemo, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
-import { LineChart, BarChart } from 'react-native-chart-kit';
+import { useNavigation } from '@react-navigation/native';
+import { BarChart } from 'react-native-chart-kit';
 import { useRides } from '../hooks/useRides';
 import { averageGainPerKm, formatDateKey, sumCosts, sumGross, sumNet } from '../utils/rideMath';
 import { buildDailySeries, filterByPeriod, Period } from '../utils/dateRanges';
 import { formatCurrency } from '../utils/format';
 
 const screenWidth = Dimensions.get('window').width - 40;
+const chartWidth = screenWidth - 40;
 
 export default function DriverDashboard() {
+  const navigation = useNavigation<any>();
   const { rides } = useRides();
   const [period, setPeriod] = useState<Period>('week');
 
@@ -79,19 +82,38 @@ export default function DriverDashboard() {
         ))}
       </View>
 
+      <View style={styles.quickActions}>
+        <TouchableOpacity
+          style={styles.actionButton}
+          onPress={() => navigation.navigate('DriverProfile')}
+        >
+          <Text style={styles.actionButtonText}>Perfil</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.actionButton}
+          onPress={() => navigation.navigate('DriverGoals')}
+        >
+          <Text style={styles.actionButtonText}>Metas</Text>
+        </TouchableOpacity>
+      </View>
+
       <View style={styles.card}>
         <Text style={styles.cardTitle}>Evolução do lucro</Text>
-        <LineChart
+        <BarChart
           data={{
             labels: series.labels,
             datasets: [{ data: series.values.length ? series.values : [0] }],
           }}
-          width={screenWidth}
-          height={220}
+          width={chartWidth}
+          height={240}
           yAxisLabel='R$ '
+          yAxisSuffix=''
           chartConfig={chartConfig}
-          bezier
           style={styles.chart}
+          fromZero
+          showBarTops
+          withInnerLines={false}
+          verticalLabelRotation={-20}
         />
       </View>
 
@@ -124,19 +146,21 @@ const chartConfig = {
   backgroundGradientFrom: '#FFFFFF',
   backgroundGradientTo: '#FFFFFF',
   decimalPlaces: 0,
-  color: (opacity = 1) => `rgba(28, 126, 214, ${opacity})`,
+  color: (opacity = 1) => `rgba(37, 99, 235, ${opacity})`,
   labelColor: (opacity = 1) => `rgba(71, 85, 105, ${opacity})`,
-  propsForDots: {
-    r: '4',
-    strokeWidth: '2',
-    stroke: '#1C7ED6',
+  fillShadowGradient: '#2563EB',
+  fillShadowGradientOpacity: 0.3,
+  barPercentage: 0.6,
+  propsForBackgroundLines: {
+    strokeDasharray: '',
+    stroke: '#E2E8F0',
   },
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F4F7FA',
+    backgroundColor: '#EAF1FF',
   },
   content: {
     padding: 20,
@@ -144,16 +168,27 @@ const styles = StyleSheet.create({
   },
   header: {
     marginBottom: 16,
+    padding: 20,
+    borderRadius: 24,
+    backgroundColor: '#1D4ED8',
+    shadowColor: '#0F172A',
+    shadowOpacity: 0.12,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 12 },
+    elevation: 6,
   },
   title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#0F172A',
+    fontSize: 28,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    marginBottom: 6,
+    lineHeight: 34,
   },
   subtitle: {
     fontSize: 13,
-    color: '#64748B',
+    color: '#DBEAFE',
     marginTop: 4,
+    maxWidth: '92%',
   },
   tabs: {
     flexDirection: 'row',
@@ -162,13 +197,13 @@ const styles = StyleSheet.create({
   },
   tab: {
     flex: 1,
-    paddingVertical: 10,
+    paddingVertical: 12,
     borderRadius: 18,
     backgroundColor: '#E2E8F0',
     alignItems: 'center',
   },
   tabActive: {
-    backgroundColor: '#1C7ED6',
+    backgroundColor: '#2563EB',
   },
   tabText: {
     color: '#334155',
@@ -178,24 +213,49 @@ const styles = StyleSheet.create({
   tabTextActive: {
     color: '#FFFFFF',
   },
-  card: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    padding: 16,
+  quickActions: {
+    flexDirection: 'row',
+    gap: 12,
     marginBottom: 16,
-    shadowColor: '#1F2937',
-    shadowOpacity: 0.06,
+  },
+  actionButton: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    paddingVertical: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#0F172A',
+    shadowOpacity: 0.08,
     shadowRadius: 10,
+    shadowOffset: { width: 0, height: 6 },
     elevation: 3,
   },
+  actionButtonText: {
+    color: '#2563EB',
+    fontWeight: '700',
+  },
+  card: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    padding: 20,
+    marginBottom: 16,
+    shadowColor: '#1F2937',
+    shadowOpacity: 0.08,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 10 },
+    elevation: 5,
+  },
   cardTitle: {
-    fontSize: 15,
+    fontSize: 18,
     fontWeight: '700',
     color: '#0F172A',
-    marginBottom: 12,
+    marginBottom: 14,
   },
   chart: {
-    borderRadius: 16,
+    borderRadius: 20,
+    alignSelf: 'center',
+    marginVertical: 8,
   },
   metricsGrid: {
     flexDirection: 'row',
@@ -204,13 +264,18 @@ const styles = StyleSheet.create({
   },
   metricCard: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
+    backgroundColor: '#EFF6FF',
+    borderRadius: 20,
     padding: 16,
+    shadowColor: '#0F172A',
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 2,
   },
   metricLabel: {
     fontSize: 12,
-    color: '#64748B',
+    color: '#475569',
   },
   metricValue: {
     fontSize: 16,
@@ -219,8 +284,9 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   insightText: {
-    fontSize: 13,
+    fontSize: 14,
     color: '#475569',
-    marginBottom: 6,
+    marginBottom: 10,
+    lineHeight: 20,
   },
 });
