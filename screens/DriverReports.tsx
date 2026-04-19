@@ -30,13 +30,13 @@ export default function DriverReports() {
       const html = `
         <html>
           <body style="font-family: Arial, sans-serif; padding: 24px;">
-            <h2>Relatório de Ganhos</h2>
-            <p>Período: ${period === 'day' ? 'Dia' : period === 'week' ? 'Semana' : 'Mês'}</p>
+            <h2>RelatÃ¡rio de Ganhos</h2>
+            <p>PerÃ­odo: ${period === 'day' ? 'Dia' : period === 'week' ? 'Semana' : 'MÃªs'}</p>
             <ul>
               <li>Total de ganhos: ${formatCurrency(totals.gross)}</li>
               <li>Total de custos: ${formatCurrency(totals.costs)}</li>
-              <li>Lucro líquido: ${formatCurrency(totals.net)}</li>
-              <li>Média de ganho por km: ${formatCurrency(totals.avgPerKm)}</li>
+              <li>Lucro lÃ­quido: ${formatCurrency(totals.net)}</li>
+              <li>MÃ©dia de ganho por km: ${formatCurrency(totals.avgPerKm)}</li>
               <li>Quantidade de corridas: ${filtered.length}</li>
             </ul>
             <h3>Detalhamento</h3>
@@ -44,7 +44,7 @@ export default function DriverReports() {
               <thead>
                 <tr>
                   <th style="text-align:left; border-bottom:1px solid #ddd;">Data</th>
-                  <th style="text-align:left; border-bottom:1px solid #ddd;">Distância</th>
+                  <th style="text-align:left; border-bottom:1px solid #ddd;">DistÃ¢ncia</th>
                   <th style="text-align:left; border-bottom:1px solid #ddd;">Recebido</th>
                   <th style="text-align:left; border-bottom:1px solid #ddd;">Custos</th>
                   <th style="text-align:left; border-bottom:1px solid #ddd;">Lucro</th>
@@ -82,7 +82,7 @@ export default function DriverReports() {
     setBackingUp(true);
     try {
       await backupRides(rides);
-      alert('Backup concluído com sucesso!');
+      alert('Backup concluÃ¬do com sucesso!');
     } catch (error: any) {
       alert(error.message ?? 'Erro ao fazer backup.');
     } finally {
@@ -92,7 +92,7 @@ export default function DriverReports() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.title}>Relatórios</Text>
+      <Text style={styles.title}>Relatï¿½rios</Text>
       <Text style={styles.subtitle}>Exporte seus resultados e mantenha backup na nuvem.</Text>
 
       <View style={styles.tabs}>
@@ -103,14 +103,14 @@ export default function DriverReports() {
             onPress={() => setPeriod(value)}
           >
             <Text style={[styles.tabText, period === value && styles.tabTextActive]}>
-              {value === 'day' ? 'Dia' : value === 'week' ? 'Semana' : 'Mês'}
+              {value === 'day' ? 'Dia' : value === 'week' ? 'Semana' : 'MÃªs'}
             </Text>
           </TouchableOpacity>
         ))}
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>Resumo do período</Text>
+        <Text style={styles.cardTitle}>Resumo do perÃ­odo</Text>
         <View style={styles.summaryRow}>
           <View style={styles.summaryItem}>
             <Text style={styles.summaryLabel}>Ganhos</Text>
@@ -123,11 +123,11 @@ export default function DriverReports() {
         </View>
         <View style={styles.summaryRow}>
           <View style={styles.summaryItem}>
-            <Text style={styles.summaryLabel}>Lucro líquido</Text>
+            <Text style={styles.summaryLabel}>Lucro lÃ­quido</Text>
             <Text style={styles.summaryValue}>{formatCurrency(totals.net)}</Text>
           </View>
           <View style={styles.summaryItem}>
-            <Text style={styles.summaryLabel}>Média por km</Text>
+            <Text style={styles.summaryLabel}>MÃ©dia por km</Text>
             <Text style={styles.summaryValue}>{formatCurrency(totals.avgPerKm)}</Text>
           </View>
         </View>
