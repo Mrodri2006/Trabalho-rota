@@ -1,242 +1,309 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  ActivityIndicator,
+  Alert,
 } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { auth } from '../firebase';
-import { loadProfile, UserProfile } from '../storage/profileStorage';
 import { useRides } from '../hooks/useRides';
-import { backupRides } from '../services/backup';
+import { sumNet, sumGross, sumCosts } from '../utils/rideMath';
 import { formatCurrency } from '../utils/format';
-import { sumGross, sumCosts, sumNet } from '../utils/rideMath';
 
 export default function DriverProfile() {
   const navigation = useNavigation<any>();
   const { rides } = useRides();
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [backupStatus, setBackupStatus] = useState('Pronto para backup');
-  const [userId, setUserId] = useState<string | null>(auth.currentUser?.uid ?? null);
+  const [userEmail, setUserEmail] = useState('');
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(async (user) => {
-      const uid = user?.uid ?? null;
-      setUserId(uid);
-      if (uid) {
-        const stored = await loadProfile(uid);
-        setProfile(stored);
-      }
-      setLoading(false);
-    });
-    return unsubscribe;
+    if (auth.currentUser?.email) {
+      setUserEmail(auth.currentUser.email);
+    }
   }, []);
 
-  const handleBackup = async () => {
-    if (!userId) {
-      return alert('Faça login para fazer backup.');
-    }
-
-    setBackupStatus('Fazendo backup...');
-    try {
-      await backupRides(rides, userId);
-      setBackupStatus('Backup concluído com sucesso');
-    } catch (error: any) {
-      setBackupStatus('Erro ao fazer backup');
-      alert(error.message ?? 'Falha ao realizar o backup.');
-    }
+  const totalStats = {
+    rides: rides.length,
+    totalEarnings: sumNet(rides),
+    totalGross: sumGross(rides),
+    totalCosts: sumCosts(rides),
   };
 
-  const currentUser = auth.currentUser;
-  const name = profile?.name || currentUser?.displayName || 'Motorista';
-  const email = profile?.email || currentUser?.email || 'Não disponível';
-  const totalGross = sumGross(rides);
-  const totalCosts = sumCosts(rides);
-  const totalNet = sumNet(rides);
+  const handleLogout = () => {
+    Alert.alert('Logout', 'Tem certeza que deseja sair?', [
+      { text: 'Cancelar', style: 'cancel' },
+      {
+        text: 'Sair',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await auth.signOut();
+            navigation.replace('DriverLogin');
+          } catch (error) {
+            Alert.alert('Erro', 'Falha ao fazer logout');
+          }
+        },
+      },
+    ]);
+  };
+
+  const handleBackToHome = () => {
+    navigation.navigate('DriverHome');
+  };
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <View style={styles.headerCard}>
-        <Text style={styles.heading}>Seu perfil</Text>
-        <Text style={styles.subtitle}>Dados do motorista e controle de backup.</Text>
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.backButton} onPress={handleBackToHome}>
+          <MaterialCommunityIcons name="arrow-left" size={24} color="#06B6D4" />
+        </TouchableOpacity>
+        <Text style={styles.title}>Perfil</Text>
+        <View style={{ width: 40 }} />
       </View>
 
-      {loading ? (
-        <View style={styles.loaderContainer}>
-          <ActivityIndicator size='large' color='#2563EB' />
+      <View style={styles.avatarSection}>
+        <View style={styles.avatarCircle}>
+          <MaterialCommunityIcons name="account" size={64} color="#06B6D4" />
         </View>
-      ) : (
-        <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Informações</Text>
-          <View style={styles.fieldRow}>
-            <Text style={styles.fieldLabel}>Nome</Text>
-            <Text style={styles.fieldValue}>{name}</Text>
-          </View>
-          <View style={styles.fieldRow}>
-            <Text style={styles.fieldLabel}>E-mail</Text>
-            <Text style={styles.fieldValue}>{email}</Text>
-          </View>
+        <Text style={styles.userName}>Motorista</Text>
+        <Text style={styles.userEmail}>{userEmail}</Text>
+      </View>
 
-          <Text style={styles.sectionTitle}>Resumo rápido</Text>
-          <View style={styles.statsGrid}>
-            <View style={styles.statCard}>
-              <Text style={styles.statLabel}>Receita</Text>
-              <Text style={styles.statValue}>{formatCurrency(totalGross)}</Text>
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Estatísticas Gerais</Text>
+        <View style={styles.statsGrid}>
+          <View style={styles.statCard}>
+            <View style={styles.statIconContainer}>
+              <MaterialCommunityIcons name="car" size={24} color="#06B6D4" />
             </View>
-            <View style={styles.statCard}>
-              <Text style={styles.statLabel}>Custos</Text>
-              <Text style={styles.statValue}>{formatCurrency(totalCosts)}</Text>
-            </View>
-            <View style={styles.statCard}>
-              <Text style={styles.statLabel}>Lucro</Text>
-              <Text style={styles.statValue}>{formatCurrency(totalNet)}</Text>
-            </View>
+            <Text style={styles.statLabel}>Total de Corridas</Text>
+            <Text style={styles.statValue}>{totalStats.rides}</Text>
           </View>
-
-          <TouchableOpacity style={styles.actionButton} onPress={handleBackup}>
-            <Text style={styles.actionButtonText}>Fazer backup das corridas</Text>
-          </TouchableOpacity>
-          <Text style={styles.statusText}>{backupStatus}</Text>
+          <View style={styles.statCard}>
+            <View style={styles.statIconContainer}>
+              <MaterialCommunityIcons name="cash" size={24} color="#10B981" />
+            </View>
+            <Text style={styles.statLabel}>Total Ganho</Text>
+            <Text style={styles.statValue}>{formatCurrency(totalStats.totalEarnings)}</Text>
+          </View>
+          <View style={styles.statCard}>
+            <View style={styles.statIconContainer}>
+              <MaterialCommunityIcons name="wallet" size={24} color="#8B5CF6" />
+            </View>
+            <Text style={styles.statLabel}>Total Bruto</Text>
+            <Text style={styles.statValue}>{formatCurrency(totalStats.totalGross)}</Text>
+          </View>
+          <View style={styles.statCard}>
+            <View style={styles.statIconContainer}>
+              <MaterialCommunityIcons name="cart-off" size={24} color="#F59E0B" />
+            </View>
+            <Text style={styles.statLabel}>Total Gasto</Text>
+            <Text style={styles.statValue}>{formatCurrency(totalStats.totalCosts)}</Text>
+          </View>
         </View>
-      )}
+      </View>
+
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Ações</Text>
+        <TouchableOpacity
+          style={styles.actionButton}
+          onPress={() => navigation.navigate('DriverReports')}
+        >
+          <MaterialCommunityIcons name="file-chart" size={20} color="#06B6D4" />
+          <Text style={styles.actionButtonText}>Ver Relatórios Completos</Text>
+          <MaterialCommunityIcons name="chevron-right" size={20} color="#06B6D4" />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.actionButton}
+          onPress={() => navigation.navigate('DriverDashboard')}
+        >
+          <MaterialCommunityIcons name="chart-box" size={20} color="#06B6D4" />
+          <Text style={styles.actionButtonText}>Dashboard</Text>
+          <MaterialCommunityIcons name="chevron-right" size={20} color="#06B6D4" />
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.card}>
+        <TouchableOpacity
+          style={styles.logoutButton}
+          onPress={handleLogout}
+        >
+          <MaterialCommunityIcons name="logout" size={20} color="#FF6B6B" />
+          <Text style={styles.logoutButtonText}>Fazer Logout</Text>
+        </TouchableOpacity>
+      </View>
     </ScrollView>
   );
 }
 
+const COLORS = {
+  background: '#0F172A',
+  card: '#1E293B',
+  cardLight: '#334155',
+  text: '#F1F5F9',
+  textDark: '#CBD5E1',
+  muted: '#94A3B8',
+  primary: '#06B6D4',
+  success: '#10B981',
+  danger: '#EF4444',
+  warning: '#F59E0B',
+};
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#EAF1FF',
+    backgroundColor: COLORS.background,
   },
   content: {
     padding: 20,
-    paddingBottom: 32,
+    paddingBottom: 36,
   },
-  headerCard: {
-    marginBottom: 16,
-    padding: 22,
-    borderRadius: 24,
-    backgroundColor: '#1D4ED8',
-    shadowColor: '#0F172A',
-    shadowOpacity: 0.12,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 12 },
-    elevation: 6,
-  },
-  heading: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: '#FFFFFF',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: '#DBEAFE',
-    lineHeight: 20,
-  },
-  loaderContainer: {
-    marginTop: 40,
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 28,
+    marginTop: 8,
   },
-  card: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 24,
-    padding: 20,
-    shadowColor: '#1F2937',
-    shadowOpacity: 0.08,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 10 },
-    elevation: 5,
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(6, 182, 212, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: COLORS.primary,
   },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#0F172A',
-    marginBottom: 14,
+  title: {
+    fontSize: 32,
+    fontWeight: '900',
+    color: COLORS.text,
+    letterSpacing: -0.5,
+    flex: 1,
+    textAlign: 'center',
   },
-  fieldRow: {
-    marginBottom: 14,
+  avatarSection: {
+    alignItems: 'center',
+    marginBottom: 28,
   },
-  fieldLabel: {
-    fontSize: 12,
-    color: '#64748B',
+  avatarCircle: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    backgroundColor: 'rgba(6, 182, 212, 0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 3,
+    borderColor: COLORS.primary,
+    marginBottom: 16,
+  },
+  userName: {
+    fontSize: 24,
+    fontWeight: '900',
+    color: COLORS.text,
     marginBottom: 6,
   },
-  fieldValue: {
-    fontSize: 15,
-    color: '#0F172A',
+  userEmail: {
+    fontSize: 14,
+    color: COLORS.muted,
     fontWeight: '600',
+  },
+  card: {
+    backgroundColor: COLORS.card,
+    borderRadius: 24,
+    padding: 20,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(6, 182, 212, 0.1)',
+    shadowColor: '#000',
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: COLORS.text,
+    marginBottom: 16,
+    letterSpacing: -0.3,
   },
   statsGrid: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 12,
-    marginBottom: 20,
   },
   statCard: {
     flex: 1,
-    backgroundColor: '#EFF6FF',
-    borderRadius: 18,
+    minWidth: '48%',
+    backgroundColor: COLORS.cardLight,
+    borderRadius: 16,
     padding: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(6, 182, 212, 0.2)',
     alignItems: 'center',
   },
-  statLabel: {
-    fontSize: 12,
-    color: '#475569',
-  },
-  statValue: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#0F172A',
-    marginTop: 8,
-  },
-  actionButton: {
-    backgroundColor: '#2563EB',
-    paddingVertical: 16,
-    borderRadius: 18,
+  statIconContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(6, 182, 212, 0.15)',
+    justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 10,
   },
-  actionButtonText: {
-    color: '#FFFFFF',
-    fontWeight: '700',
+  statLabel: {
+    fontSize: 11,
+    color: COLORS.muted,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginBottom: 6,
+    textTransform: 'uppercase',
+    letterSpacing: 0.3,
   },
-  statusText: {
-    color: '#64748B',
-    fontSize: 13,
-    marginBottom: 18,
+  statValue: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: COLORS.primary,
     textAlign: 'center',
   },
-  quickActions: {
+  actionButton: {
     flexDirection: 'row',
-    gap: 12,
-    marginBottom: 18,
-  },
-  quickActionButton: {
-    flex: 1,
-    backgroundColor: '#EFF6FF',
-    borderRadius: 18,
-    paddingVertical: 14,
     alignItems: 'center',
-    justifyContent: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    marginBottom: 12,
+    backgroundColor: COLORS.cardLight,
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#D1D5DB',
+    borderColor: 'rgba(6, 182, 212, 0.2)',
+    gap: 12,
   },
-  quickActionText: {
-    color: '#2563EB',
+  actionButtonText: {
+    flex: 1,
+    fontSize: 15,
     fontWeight: '700',
+    color: COLORS.text,
   },
-  secondaryButton: {
-    backgroundColor: '#F8FAFC',
-    paddingVertical: 14,
-    borderRadius: 18,
+  logoutButton: {
+    flexDirection: 'row',
     alignItems: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: COLORS.danger,
+    gap: 12,
   },
-  secondaryButtonText: {
-    color: '#2563EB',
-    fontWeight: '700',
+  logoutButtonText: {
+    flex: 1,
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#FF6B6B',
   },
 });

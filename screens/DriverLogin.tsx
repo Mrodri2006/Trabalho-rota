@@ -5,220 +5,164 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { auth, firestore } from '../firebase';
-import { saveProfile } from '../storage/profileStorage';
+import { auth } from '../firebase';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 
 export default function DriverLogin() {
   const navigation = useNavigation<any>();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isLogin, setIsLogin] = useState(true);
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = async () => {
-    if (!email.trim() || !password.trim()) {
-      alert('Preencha e-mail e senha.');
+  const handleAuth = async () => {
+    if (!email || !password) {
+      Alert.alert('Error', 'Please fill in all fields');
       return;
     }
 
+    setLoading(true);
     try {
-      const credential = await auth.signInWithEmailAndPassword(
-        email.trim(),
-        password
-      );
-
-      const userId = credential.user?.uid ?? auth.currentUser?.uid;
-      if (userId) {
-        try {
-          const snapshot = await firestore.collection('drivers').doc(userId).get();
-          const data = snapshot.data();
-          if (data?.name && data?.email) {
-            await saveProfile(userId, { name: data.name, email: data.email });
-          } else {
-            await saveProfile(userId, { name: '', email: email.trim() });
-          }
-        } catch {
-          await saveProfile(userId, { name: '', email: email.trim() });
-        }
+      if (isLogin) {
+        await signInWithEmailAndPassword(auth, email, password);
+      } else {
+        await createUserWithEmailAndPassword(auth, email, password);
       }
-
       navigation.replace('DriverHome');
     } catch (error: any) {
-      alert(error.message ?? 'Erro ao entrar.');
+      Alert.alert('Error', error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
-      <View style={styles.backgroundCircle} />
-      <View style={styles.backgroundCircleSmall} />
+    <View style={styles.container}>
+      <View style={styles.content}>
+        <Text style={styles.title}>Driver Login</Text>
+        <Text style={styles.subtitle}>
+          {isLogin ? 'Sign in to your account' : 'Create a new account'}
+        </Text>
 
-      <View style={styles.card}>
-        <View style={styles.cardHeader}>
-          <Text style={styles.badge}>Motorista</Text>
-          <Text style={styles.title}>Faca login</Text>
-          <Text style={styles.subtitle}>
-            Acompanhe seus ganhos e tenha seu historico sempre a mao.
-          </Text>
-        </View>
-
-        <View style={styles.inputGroup}>
-          <Text style={styles.inputLabel}>E-mail</Text>
+        <View style={styles.form}>
           <TextInput
-            placeholder='E-mail'
+            style={styles.input}
+            placeholder="Email"
             value={email}
             onChangeText={setEmail}
-            style={styles.input}
-            placeholderTextColor='#94A3B8'
-            keyboardType='email-address'
-            autoCapitalize='none'
+            keyboardType="email-address"
+            editable={!loading}
+            placeholderTextColor="#999"
           />
-        </View>
 
-        <View style={styles.inputGroup}>
-          <Text style={styles.inputLabel}>Senha</Text>
           <TextInput
-            placeholder='Senha'
+            style={styles.input}
+            placeholder="Password"
             value={password}
             onChangeText={setPassword}
-            style={styles.input}
-            placeholderTextColor='#94A3B8'
             secureTextEntry
+            editable={!loading}
+            placeholderTextColor="#999"
           />
+
+          <TouchableOpacity
+            style={[styles.authButton, loading && styles.authButtonDisabled]}
+            onPress={handleAuth}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.authButtonText}>
+                {isLogin ? 'Sign In' : 'Sign Up'}
+              </Text>
+            )}
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => setIsLogin(!isLogin)}
+            disabled={loading}
+          >
+            <Text style={styles.toggleText}>
+              {isLogin
+                ? "Don't have an account? Sign up"
+                : 'Already have an account? Sign in'}
+            </Text>
+          </TouchableOpacity>
         </View>
-
-        <TouchableOpacity style={styles.primaryButton} onPress={handleLogin}>
-          <Text style={styles.primaryButtonText}>Entrar</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.linkButton}
-          onPress={() => navigation.navigate('DriverRegister')}
-        >
-          <Text style={styles.linkText}>Criar conta</Text>
-        </TouchableOpacity>
       </View>
-    </KeyboardAvoidingView>
+    </View>
   );
 }
-
-const COLORS = {
-  background: '#F5F7FB',
-  card: '#FFFFFF',
-  text: '#0F172A',
-  muted: '#64748B',
-  softAlt: '#F1F5F9',
-  primary: '#1C7ED6',
-  primaryDark: '#0B4F9F',
-};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
-    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
     justifyContent: 'center',
+    padding: 20,
+  },
+  content: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
     padding: 24,
-  },
-  backgroundCircle: {
-    position: 'absolute',
-    width: 280,
-    height: 280,
-    borderRadius: 140,
-    backgroundColor: '#E0ECFF',
-    top: -80,
-    right: -80,
-  },
-  backgroundCircleSmall: {
-    position: 'absolute',
-    width: 160,
-    height: 160,
-    borderRadius: 80,
-    backgroundColor: '#EEF3FF',
-    bottom: -40,
-    left: -40,
-  },
-  card: {
-    width: '100%',
-    maxWidth: 420,
-    backgroundColor: COLORS.card,
-    borderRadius: 26,
-    padding: 24,
-    shadowColor: '#0F172A',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 16,
-    elevation: 4,
-  },
-  cardHeader: {
-    marginBottom: 20,
-  },
-  badge: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#E8F1FF',
-    color: COLORS.primaryDark,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    fontWeight: '700',
-    fontSize: 12,
-    marginBottom: 12,
+    shadowRadius: 4,
+    elevation: 3,
   },
   title: {
-    fontSize: 26,
-    fontWeight: '800',
-    color: COLORS.text,
-    marginBottom: 6,
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 8,
+    textAlign: 'center',
   },
   subtitle: {
     fontSize: 14,
-    color: COLORS.muted,
-    lineHeight: 20,
+    color: '#666',
+    marginBottom: 24,
+    textAlign: 'center',
   },
-  inputGroup: {
-    marginBottom: 14,
-  },
-  inputLabel: {
-    fontSize: 12,
-    color: COLORS.muted,
-    marginBottom: 6,
+  form: {
+    gap: 16,
   },
   input: {
-    backgroundColor: COLORS.softAlt,
-    borderRadius: 14,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    color: COLORS.text,
     borderWidth: 1,
-    borderColor: '#E5EAF1',
-  },
-  primaryButton: {
-    backgroundColor: COLORS.primary,
-    paddingVertical: 14,
-    borderRadius: 14,
-    alignItems: 'center',
-    marginTop: 6,
-    shadowColor: COLORS.primaryDark,
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  primaryButtonText: {
-    color: '#FFFFFF',
-    fontWeight: '700',
+    borderColor: '#ddd',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
     fontSize: 16,
+    color: '#333',
+    backgroundColor: '#fafafa',
   },
-  linkButton: {
+  authButton: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 14,
+    borderRadius: 8,
     alignItems: 'center',
-    marginTop: 14,
+    justifyContent: 'center',
+    marginTop: 8,
   },
-  linkText: {
-    color: COLORS.primary,
-    fontWeight: '700',
-    fontSize: 13,
+  authButtonDisabled: {
+    opacity: 0.6,
+  },
+  authButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  toggleText: {
+    color: '#007AFF',
+    fontSize: 14,
+    textAlign: 'center',
+    marginTop: 12,
+    fontWeight: '500',
   },
 });

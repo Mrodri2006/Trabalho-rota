@@ -8,6 +8,7 @@ import {
   ScrollView,
 } from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useRides } from '../hooks/useRides';
 import { Ride } from '../storage/rideStorage';
@@ -107,18 +108,23 @@ export default function DriverHome() {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.header}>
-        <View>
+        <View style={styles.headerInfo}>
           <Text style={styles.title}>Minhas Corridas</Text>
           <Text style={styles.subtitle}>Registre e acompanhe seu lucro por km</Text>
-        </View><View style={styles.headerActions}>
+        </View>
+        <View style={styles.headerActions}>
           <TouchableOpacity
-            style={styles.secondaryButton}
+            style={styles.profileButton}
+            onPress={() => navigation.navigate('DriverProfile')}
+          >
+            <MaterialCommunityIcons name="account-circle" size={28} color={COLORS.primary} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.secondaryButton, styles.dashboardButton]}
             onPress={() => navigation.navigate('DriverDashboard')}
           >
+            <MaterialCommunityIcons name="view-dashboard-outline" size={18} color={COLORS.primary} />
             <Text style={styles.secondaryButtonText}>Dashboard</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-            <Text style={styles.logoutText}>Sair</Text>
           </TouchableOpacity>
         </View>
       </View><View style={styles.card}>
@@ -213,7 +219,7 @@ export default function DriverHome() {
           <View key={ride.id} style={styles.rideCard}>
             <View>
               <Text style={styles.rideTitle}>
-                {formatNumber(ride.distanceKm)} km • {formatCurrency(ride.gross)}
+                {formatNumber(ride.distanceKm)} km {formatCurrency(ride.gross)}
               </Text>
               <Text style={styles.rideSubtitle}>
                 {new Date(ride.dateISO).toLocaleString('pt-BR')}
@@ -243,14 +249,20 @@ export default function DriverHome() {
 }
 
 const COLORS = {
-  background: '#F5F7FB',
-  card: '#FFFFFF',
-  text: '#0F172A',
-  muted: '#64748B',
-  soft: '#E2E8F0',
-  softAlt: '#F1F5F9',
-  primary: '#1C7ED6',
-  primaryDark: '#0B4F9F',
+  background: '#0F172A',
+  card: '#1E293B',
+  cardLight: '#334155',
+  text: '#F1F5F9',
+  textDark: '#CBD5E1',
+  muted: '#94A3B8',
+  soft: '#475569',
+  softAlt: '#1E293B',
+  primary: '#06B6D4',
+  primaryDark: '#0891B2',
+  secondary: '#8B5CF6',
+  success: '#10B981',
+  danger: '#EF4444',
+  accent: '#F59E0B',
 };
 
 const styles = StyleSheet.create({
@@ -265,41 +277,54 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'center',
+    flexWrap: 'wrap',
     marginTop: 14,
-    marginBottom: 20,
+    marginBottom: 28,
     gap: 12,
+  },
+  headerInfo: {
+    flexGrow: 1,
+    flexShrink: 1,
+    minWidth: 220,
   },
   headerActions: {
     flexDirection: 'row',
     gap: 8,
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    flexWrap: 'wrap',
   },
   title: {
-    fontSize: 26,
-    fontWeight: '800',
+    fontSize: 32,
+    fontWeight: '900',
     color: COLORS.text,
-    letterSpacing: 0.2,
+    letterSpacing: -0.5,
   },
   subtitle: {
-    fontSize: 13,
+    fontSize: 14,
     color: COLORS.muted,
-    marginTop: 6,
+    marginTop: 8,
+    fontWeight: '500',
   },
   card: {
     backgroundColor: COLORS.card,
-    borderRadius: 22,
-    padding: 18,
-    shadowColor: '#0F172A',
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 4,
-    marginBottom: 20,
+    borderRadius: 24,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 8,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(6, 182, 212, 0.1)',
   },
   cardTitle: {
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: 18,
+    fontWeight: '800',
     color: COLORS.text,
-    marginBottom: 12,
+    marginBottom: 16,
+    letterSpacing: -0.3,
   },
   inputRow: {
     flexDirection: 'row',
@@ -307,90 +332,132 @@ const styles = StyleSheet.create({
   },
   inputGroup: {
     flex: 1,
-    marginBottom: 12,
+    marginBottom: 14,
   },
   inputLabel: {
-    fontSize: 12,
+    fontSize: 13,
     color: COLORS.muted,
-    marginBottom: 6,
+    marginBottom: 8,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   input: {
-    backgroundColor: COLORS.softAlt,
-    borderRadius: 14,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
+    backgroundColor: COLORS.cardLight,
+    borderRadius: 16,
+    paddingHorizontal: 14,
+    paddingVertical: 13,
     color: COLORS.text,
-    borderWidth: 1,
-    borderColor: '#E5EAF1',
+    borderWidth: 2,
+    borderColor: 'rgba(6, 182, 212, 0.2)',
+    fontSize: 15,
+    fontWeight: '600',
   },
   dateButton: {
-    backgroundColor: COLORS.soft,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    borderRadius: 12,
-    marginBottom: 16,
+    backgroundColor: COLORS.cardLight,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderRadius: 16,
+    marginBottom: 18,
+    borderWidth: 2,
+    borderColor: 'rgba(6, 182, 212, 0.2)',
   },
   dateButtonText: {
-    color: COLORS.muted,
-    fontSize: 13,
+    color: COLORS.primary,
+    fontSize: 14,
+    fontWeight: '700',
   },
   metricsRow: {
     flexDirection: 'row',
     gap: 12,
-    marginBottom: 16,
+    marginBottom: 18,
   },
   metricCard: {
     flex: 1,
-    backgroundColor: '#F8FAFF',
-    borderRadius: 14,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#E5EEFF',
+    backgroundColor: 'rgba(6, 182, 212, 0.1)',
+    borderRadius: 16,
+    padding: 14,
+    borderWidth: 2,
+    borderColor: 'rgba(6, 182, 212, 0.3)',
   },
   metricLabel: {
     fontSize: 12,
     color: COLORS.muted,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 0.3,
   },
   metricValue: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: COLORS.text,
-    marginTop: 6,
+    fontSize: 18,
+    fontWeight: '900',
+    color: COLORS.primary,
+    marginTop: 8,
   },
   primaryButton: {
     backgroundColor: COLORS.primary,
-    paddingVertical: 14,
-    borderRadius: 14,
+    paddingVertical: 16,
+    borderRadius: 16,
     alignItems: 'center',
-    shadowColor: COLORS.primaryDark,
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowColor: COLORS.primary,
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 6,
   },
   primaryButtonText: {
-    color: '#FFFFFF',
-    fontWeight: '700',
-    fontSize: 15,
+    color: COLORS.background,
+    fontWeight: '800',
+    fontSize: 16,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   secondaryButton: {
-    backgroundColor: COLORS.soft,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
+    backgroundColor: COLORS.cardLight,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
     borderRadius: 20,
+    borderWidth: 2,
+    borderColor: COLORS.primary,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  dashboardButton: {
+    shadowColor: COLORS.primary,
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 4,
+  },
+  profileButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(6, 182, 212, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: COLORS.primary,
+    shadowColor: COLORS.primary,
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 4,
   },
   secondaryButtonText: {
-    color: COLORS.text,
-    fontWeight: '600',
+    color: COLORS.primary,
+    fontWeight: '700',
+    fontSize: 14,
   },
   logoutButton: {
-    backgroundColor: '#FFE8E8',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
+    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
     borderRadius: 20,
+    borderWidth: 2,
+    borderColor: COLORS.danger,
   },
   logoutText: {
-    color: '#C2413B',
+    color: '#FF6B6B',
     fontWeight: '700',
+    fontSize: 14,
   },
   summaryRow: {
     flexDirection: 'row',
@@ -404,37 +471,38 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#EDF2F7',
+    borderColor: 'rgba(6, 182, 212, 0.1)',
   },
   summaryLabel: {
-    fontSize: 11,
+    fontSize: 12,
     color: COLORS.muted,
+    fontWeight: '600',
   },
   summaryValue: {
-    fontSize: 15,
-    fontWeight: '700',
+    fontSize: 16,
+    fontWeight: '800',
     color: COLORS.text,
-    marginTop: 4,
+    marginTop: 6,
   },
   dailyTotals: {
     flexDirection: 'row',
-    gap: 10,
-    marginBottom: 18,
+    gap: 12,
+    marginBottom: 24,
   },
   dailyCard: {
     flex: 1,
-    backgroundColor: '#F8FAFF',
-    padding: 12,
-    borderRadius: 16,
+    backgroundColor: COLORS.cardLight,
+    padding: 16,
+    borderRadius: 18,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderWidth: 2,
+    borderColor: 'rgba(6, 182, 212, 0.2)',
   },
   listHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 14,
   },
   listActions: {
     flexDirection: 'row',
@@ -442,57 +510,71 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   resetButton: {
-    backgroundColor: '#FFE8E8',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 14,
+    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: COLORS.danger,
   },
   resetText: {
-    color: '#C2413B',
+    color: '#FF6B6B',
     fontWeight: '700',
+    fontSize: 13,
   },
   linkText: {
     color: COLORS.primary,
-    fontWeight: '700',
+    fontWeight: '800',
+    fontSize: 14,
+    textTransform: 'uppercase',
+    letterSpacing: 0.3,
   },
   emptyText: {
     color: COLORS.muted,
     textAlign: 'center',
-    marginTop: 12,
+    marginTop: 24,
+    fontSize: 15,
+    fontWeight: '500',
   },
   rideCard: {
     backgroundColor: COLORS.card,
-    padding: 14,
-    borderRadius: 16,
-    marginBottom: 10,
+    padding: 16,
+    borderRadius: 18,
+    marginBottom: 12,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#EDF2F7',
+    borderColor: 'rgba(6, 182, 212, 0.1)',
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 3,
   },
   rideTitle: {
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 15,
+    fontWeight: '700',
     color: COLORS.text,
   },
   rideSubtitle: {
-    fontSize: 11,
+    fontSize: 12,
     color: COLORS.muted,
-    marginTop: 4,
+    marginTop: 6,
+    fontWeight: '500',
   },
   rideValues: {
     alignItems: 'flex-end',
   },
   rideNet: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: COLORS.text,
+    fontSize: 15,
+    fontWeight: '800',
+    color: COLORS.primary,
   },
   ridePerKm: {
-    fontSize: 11,
+    fontSize: 12,
     color: COLORS.muted,
     marginTop: 4,
+    fontWeight: '600',
   },
 });
 

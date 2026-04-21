@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { BarChart } from 'react-native-chart-kit';
 import { useRides } from '../hooks/useRides';
@@ -64,35 +65,36 @@ export default function DriverDashboard() {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.header}>
-        <Text style={styles.title}>Dashboard</Text>
-        <Text style={styles.subtitle}>Análise dos seus ganhos por período</Text>
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+          <MaterialCommunityIcons name="arrow-left" size={24} color="#06B6D4" />
+        </TouchableOpacity>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.title}>Dashboard</Text>
+          <Text style={styles.subtitle}>Análise dos seus ganhos por período</Text>
+        </View>
       </View>
 
       <View style={styles.tabs}>
-        {(['day', 'week', 'month'] as Period[]).map((value) => (
+        {(['day', 'week'] as Period[]).map((value) => (
           <TouchableOpacity
             key={value}
             style={[styles.tab, period === value && styles.tabActive]}
             onPress={() => setPeriod(value)}
           >
             <Text style={[styles.tabText, period === value && styles.tabTextActive]}>
-              {value === 'day' ? 'Dia' : value === 'week' ? 'Semana' : 'Mês'}
+              {value === 'day' ? 'Dia' : 'Semana'}
             </Text>
           </TouchableOpacity>
         ))}
       </View>
 
       <View style={styles.quickActions}>
-        <TouchableOpacity
-          style={styles.actionButton}
-          onPress={() => navigation.navigate('DriverProfile')}
-        >
-          <Text style={styles.actionButtonText}>Perfil</Text>
-        </TouchableOpacity>
+
         <TouchableOpacity
           style={styles.actionButton}
           onPress={() => navigation.navigate('DriverGoals')}
         >
+          <MaterialCommunityIcons name="target" size={20} color="#06B6D4" />
           <Text style={styles.actionButtonText}>Metas</Text>
         </TouchableOpacity>
       </View>
@@ -143,114 +145,141 @@ export default function DriverDashboard() {
 }
 
 const chartConfig = {
-  backgroundGradientFrom: '#FFFFFF',
-  backgroundGradientTo: '#FFFFFF',
+  backgroundGradientFrom: '#1E293B',
+  backgroundGradientTo: '#1E293B',
   decimalPlaces: 0,
-  color: (opacity = 1) => `rgba(37, 99, 235, ${opacity})`,
-  labelColor: (opacity = 1) => `rgba(71, 85, 105, ${opacity})`,
-  fillShadowGradient: '#2563EB',
-  fillShadowGradientOpacity: 0.3,
+  color: (opacity = 1) => `rgba(6, 182, 212, ${opacity})`,
+  labelColor: (opacity = 1) => `rgba(148, 163, 184, ${opacity})`,
+  fillShadowGradient: '#06B6D4',
+  fillShadowGradientOpacity: 0.5,
   barPercentage: 0.6,
   propsForBackgroundLines: {
     strokeDasharray: '',
-    stroke: '#E2E8F0',
+    stroke: 'rgba(6, 182, 212, 0.1)',
   },
+};
+
+const COLORS = {
+  background: '#0F172A',
+  card: '#1E293B',
+  cardLight: '#334155',
+  text: '#F1F5F9',
+  textDark: '#CBD5E1',
+  muted: '#94A3B8',
+  primary: '#06B6D4',
+  success: '#10B981',
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#EAF1FF',
+    backgroundColor: COLORS.background,
   },
   content: {
     padding: 20,
     paddingBottom: 32,
   },
   header: {
-    marginBottom: 16,
-    padding: 20,
-    borderRadius: 24,
-    backgroundColor: '#1D4ED8',
-    shadowColor: '#0F172A',
-    shadowOpacity: 0.12,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 12 },
-    elevation: 6,
+    marginBottom: 24,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(6, 182, 212, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: COLORS.primary,
+    marginTop: 4,
   },
   title: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: '#FFFFFF',
-    marginBottom: 6,
-    lineHeight: 34,
+    fontSize: 32,
+    fontWeight: '900',
+    color: COLORS.text,
+    letterSpacing: -0.5,
   },
   subtitle: {
-    fontSize: 13,
-    color: '#DBEAFE',
-    marginTop: 4,
-    maxWidth: '92%',
+    fontSize: 14,
+    color: COLORS.muted,
+    marginTop: 6,
+    fontWeight: '500',
   },
   tabs: {
     flexDirection: 'row',
     gap: 8,
-    marginBottom: 16,
+    marginBottom: 18,
   },
   tab: {
     flex: 1,
     paddingVertical: 12,
     borderRadius: 18,
-    backgroundColor: '#E2E8F0',
+    backgroundColor: COLORS.cardLight,
     alignItems: 'center',
+    borderWidth: 2,
+    borderColor: 'rgba(6, 182, 212, 0.2)',
   },
   tabActive: {
-    backgroundColor: '#2563EB',
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
   },
   tabText: {
-    color: '#334155',
-    fontWeight: '600',
+    color: COLORS.muted,
+    fontWeight: '700',
     fontSize: 13,
+    textTransform: 'uppercase',
+    letterSpacing: 0.3,
   },
   tabTextActive: {
-    color: '#FFFFFF',
+    color: COLORS.background,
   },
   quickActions: {
     flexDirection: 'row',
     gap: 12,
-    marginBottom: 16,
+    marginBottom: 20,
   },
   actionButton: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS.card,
     borderRadius: 18,
     paddingVertical: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#0F172A',
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 6 },
+    flexDirection: 'row',
+    gap: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(6, 182, 212, 0.2)',
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
     elevation: 3,
   },
   actionButtonText: {
-    color: '#2563EB',
+    color: COLORS.primary,
     fontWeight: '700',
+    fontSize: 14,
   },
   card: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS.card,
     borderRadius: 24,
     padding: 20,
-    marginBottom: 16,
-    shadowColor: '#1F2937',
-    shadowOpacity: 0.08,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 10 },
-    elevation: 5,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(6, 182, 212, 0.1)',
+    shadowColor: '#000',
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 8,
   },
   cardTitle: {
     fontSize: 18,
-    fontWeight: '700',
-    color: '#0F172A',
-    marginBottom: 14,
+    fontWeight: '800',
+    color: COLORS.text,
+    marginBottom: 16,
+    letterSpacing: -0.3,
   },
   chart: {
     borderRadius: 20,
@@ -260,33 +289,34 @@ const styles = StyleSheet.create({
   metricsGrid: {
     flexDirection: 'row',
     gap: 12,
-    marginBottom: 16,
+    marginBottom: 20,
   },
   metricCard: {
     flex: 1,
-    backgroundColor: '#EFF6FF',
-    borderRadius: 20,
+    backgroundColor: COLORS.cardLight,
+    borderRadius: 18,
     padding: 16,
-    shadowColor: '#0F172A',
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 2,
+    borderWidth: 2,
+    borderColor: 'rgba(6, 182, 212, 0.2)',
   },
   metricLabel: {
     fontSize: 12,
-    color: '#475569',
+    color: COLORS.muted,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 0.3,
   },
   metricValue: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#0F172A',
-    marginTop: 6,
+    fontSize: 18,
+    fontWeight: '900',
+    color: COLORS.primary,
+    marginTop: 8,
   },
   insightText: {
     fontSize: 14,
-    color: '#475569',
-    marginBottom: 10,
+    color: COLORS.muted,
+    marginBottom: 12,
     lineHeight: 20,
+    fontWeight: '500',
   },
 });
